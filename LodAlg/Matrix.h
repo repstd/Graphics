@@ -12,11 +12,6 @@ private:
 	
 public:
 	CMatrix():row(0),col(0),data(NULL){}
-	//CMatrix(int r, int c):row(r),col(c),data(new T[r*c]){}
-	//CMatrix(int r, int c, T* pData):row(r),col(c),data(new T[r*c])
-	//{
-	//	memcpy(data, pData, row*col*sizeof(T));
-	//}
     ~CMatrix(){if(data!=NULL) delete data; data = NULL;}
 	
 	T& operator()(int i, int j) const
@@ -24,18 +19,34 @@ public:
 		return data[i*col + j];
 	
 	};
-	void SetData(T *pData){	memcpy(data, pData, row*col*sizeof(T)); }
+	void SetData(T *pData)
+	{	
+		memcpy(data, pData, row*col*sizeof(T));
+	}
+	void SetData(T *pData,int srcOffsetX,int srcOffsetY,int srcWidth,int SrcHeight,int dstWidth,int dstHeight)
+	{
+
+		for (int y = 0; y < dstHeight; y++)
+		{
+
+			memcpy(data+srcOffsetY*dstWidth,pData + (srcOffsetY + y)*srcWidth+srcOffsetX,dstHeight)
+		}
+	}
 	void Reset(int r, int c) const
 	{
-		if (data == NULL)
-		{
-			row = r;
-			col = c;
-			data = new T[row*col];
 
+		if (data != NULL && (r != row || c != col) )
+		{
+			
+			delete data;
+			data = NULL;
 		}
+		row = r;
+		col = c;
+		if (data == NULL)
+			data = new T[row*col];
+	
 		memset(data, 0, row*col);
 	}
-	void Reset(int r, int c, T* pData){Reset(r,c); SetData(pData);}
 };
 #endif //__MATRIX_H__
