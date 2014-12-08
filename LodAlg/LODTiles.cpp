@@ -12,20 +12,6 @@
 #include <osgDB/Registry>
 #include <osgDB/WriteFile>
 #define MAX_DIS 700.0
-void saveBMP(int width, int height, int channel, BYTE* data, char* filename, int pixelFormat = GL_BGR)
-{
-	osg::ref_ptr<osgDB::ReaderWriter> m_bmpWirter;
-
-	m_bmpWirter = osgDB::Registry::instance()->getReaderWriterForExtension("mp4");
-
-
-	osg::ref_ptr<osg::Image> img = new osg::Image();
-	img->allocateImage(width, height, channel, pixelFormat, GL_BYTE);
-	BYTE* p = img->data(0, 0);
-	memcpy(p, data, width*height * channel);
-
-	m_bmpWirter->writeImage(*img, filename);
-}
 #define _DEBUG_FILENAME_ "./pos.txt"
 #define _DEBUG_ENCODE_MSG(filename,format,data) \
 {\
@@ -50,16 +36,8 @@ void saveBMP(int width, int height, int channel, BYTE* data, char* filename, int
 
 LODTile::LODTile()
 {
-	glViewport(0, 0, 1280, 720);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45, (float)1280 / (float)720, 0, 100);
-
 }
 
-LODTile::~LODTile()
-{
-}
 
 void LODTile::initParams()
 {
@@ -69,8 +47,8 @@ void LODTile::initParams()
 	m_LodMatrix.Reset(m_rlocalPara._width, m_rlocalPara._height);
 	m_DHMatrix.Reset(m_rlocalPara._width, m_rlocalPara._height);
 	for (int i = 0; i < m_rlocalPara._width; i++)
-	for (int j = 0; j < m_rlocalPara._height; j++)
-		m_LodMatrix(i, j) = VS_UNREACH;
+		for (int j = 0; j < m_rlocalPara._height; j++)
+			m_LodMatrix(i, j) = VS_UNREACH;
 	CalculateDHMatrix();
 
 	int sizeX = m_rlocalPara._width - 1;
@@ -95,9 +73,10 @@ void LODTile::init(BYTE* heightMat, const Range globalRange, const Range localRa
 
 	m_rlocalPara = localRange;
 	m_rglobalPara = globalRange;
-	int offsetX = globalRange._centerX - globalRange._width >> 1;
-	int offsetY = globalRange._centerY - globalRange._height >> 1;
-
+	/*int offsetX = globalRange._centerX - ((globalRange._width-1 )>> 1);
+	int offsetY = globalRange._centerY - ((globalRange._height - 1) >> 1);*/
+	int offsetX =0;
+	int offsetY =0;
 	m_HMMatrix.Reset(m_rlocalPara._width, m_rlocalPara._height);
 
 	m_HMMatrix.SetData(heightMat, offsetX, offsetY, globalRange._width, globalRange._height, localRange._width, localRange._height);
@@ -107,18 +86,14 @@ void LODTile::init(BYTE* heightMat, const Range globalRange, const Range localRa
 
 
 }
-void LODTile::updateCameraInfo(osg::RenderInfo& renderInfo)
+void LODTile::updateCameraInfo(osg::Vec3d& eye)
 {
-
+	m_ViewX = eye.x();
+	m_ViewY= -1.0*eye.z();
+	m_ViewZ = eye.y();
 
 }
 
-void LODTile::run()
-{
-	
-	BFSRender();
-	m_LodMatrix.Reset(m_rlocalPara._width, m_rlocalPara._height);
-}
 
 
 void LODTile::BFSRender() const
@@ -517,7 +492,9 @@ inline void LODTile::GLVERTEX(int x, int y) const
 	int lx = x;
 	int ly = y;
 	local2Global(lx, ly, z);
+
 	glVertex3f(lx, ly, z);
+
 	//glVertex3f(x + m_rlocalPara._centerX - m_rglobalPara._centerY - m_rglobalPara._width >> 1,
 	//			y + m_rlocalPara._centerY-m_rglobalPara._centerY-m_rglobalPara._height >> 1,
 	//			GetHeight(x, y) - 100); 

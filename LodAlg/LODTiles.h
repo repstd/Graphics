@@ -1,7 +1,8 @@
-#pragma 
+#pragma once
 #include "stdafx.h"
 #include "Matrix.h"
-#include <OpenThreads/Thread>
+#include <osg/Matrix>
+#include <OpenThreads\Thread>
 #include <assert.h>
 
 enum STATUS
@@ -162,25 +163,23 @@ typedef struct _Range
 } Range;
 
 
-class LODTile :public OpenThreads::Thread
+class LODTile 
 {
 public:
-
 	LODTile();
-	~LODTile();
+
 
 	void init(BYTE* heightMat, const Range globalRange,const Range localRange);
-	void updateCameraInfo(osg::RenderInfo& renderInfo);
+	void updateCameraInfo(osg::Vec3d& eye);
 
 
-	void run();
+	void BFSRender() const;
 
 private:
 
 
 	void initParams();
 
-	void BFSRender() const;
 	inline void GLVERTEX(int x, int y) const;
 	inline void local2Global(int& x, int& y, int& z) const;
 
@@ -208,6 +207,9 @@ private:
 
 private:
 
+	CMatrix<BYTE> m_HMMatrix;
+	CMatrix<unsigned char>    m_LodMatrix;
+	CMatrix<float> m_DHMatrix;
 
 	float m_fc;
 	float m_fC;
@@ -220,9 +222,5 @@ private:
 	PatchSize   m_delta[30];
 	mutable int   m_neighbor[4];
 	float         m_fScale;
-	CMatrix<BYTE> m_HMMatrix;
-	CMatrix<unsigned char>    m_LodMatrix;
-	CMatrix<float> m_DHMatrix;
-
 };
 

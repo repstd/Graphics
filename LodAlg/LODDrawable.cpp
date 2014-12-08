@@ -50,6 +50,7 @@ void saveBMP(int width, int height, int channel, BYTE* data, char* filename, int
 #define DEBUG_ENCODE_MSG(format,data,...) _DEBUG_ENCODE_MSG(_DEBUG_FILENAME_,format,data)
 
 LODDrawable::LODDrawable()
+
 {
 	setSupportsDisplayList(false);
 	glViewport(0, 0, 1280, 720);
@@ -91,10 +92,11 @@ void LODDrawable::init(const char* filename)
 	fread(tempHeightMap, 1, m_rglobalPara._width*m_rglobalPara._height, fp);
 
 
-	LODTile tile;
+	TileThread* tile = new TileThread();
+	//tile->Init();
+	tile->init(tempHeightMap, m_rglobalPara, m_rglobalPara);
+	m_vecTile.push_back(*tile);
 
-	tile.init(tempHeightMap, m_rglobalPara, m_rglobalPara);
-	m_vecTile.push_back(tile);
 	m_vecRange.push_back(m_rglobalPara);
 
 	delete[] tempHeightMap;
@@ -118,12 +120,22 @@ void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 	gluLookAt(eye.x(), eye.y(), eye.z(), at.x(), at.y(), at.z(), up.x(), up.y(), up.z());
 
 	int sz = m_vecTile.size();
-
+	std::vector<boost::thread> m_threadPool;
 	for (int i = 0; i < sz; i++)
 	{
-		m_vecTile[i].updateCameraInfo(renderInfo);
-		m_vecTile[i].join();
+		m_vecTile[i].updateCameraInfo(eye);
+		//m_vecTile[i].BFSRender();
+
+		//m_vecTile[i].start();
+
+		m_threadPool.push_back(boost::thread(m_vecTile[i]));
 	}
+	for (int i = 0; i < sz; i++)
+	{
+
+		m_threadPool[i].join();
+	}
+	
 	
 }
 

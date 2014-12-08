@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "LODDrawable.h"
+#include "LODTiles.h"
 #include <osgViewer/Viewer>
 #include <osgViewer/View>
 
@@ -15,13 +16,48 @@
 #include <osgGA/GUIEventHandler>
 #include <osg/Node>
 #include <osg/BlendFunc>
+#include <OpenThreads\Thread>
 #define _HEIGHT_FIELD_FILE_RAW "./data/terrain.raw"
 #define _HEIGHT_FIELD_FILE_SRTM "./data/srtm_ramp2_world_5400x2700_2.jpg"
+class thread:
+	public OpenThreads::Thread,LODTile
+{
+public:
+	thread() :OpenThreads::Thread(), LODTile()
+	{
+
+	}
+	virtual void run()
+	{
+		this->BFSRender();
+		
+	}
+private:
+	int x;
+	mutable int y;
+	int f() const
+	{
+		return 0;
+	}
+
+};
+
+void test()
+{
+
+
+}
 
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 
+
+
+	//thread* th = new thread();
+	//th->Init();
+	//th->start();
+	//return 0;
 	osgViewer::Viewer viewer;
 
 

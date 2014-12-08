@@ -6,10 +6,7 @@
 template <class T>
 class CMatrix
 {
-private:
-	mutable int row, col;
-	mutable T * data;
-	
+
 public:
 	CMatrix():row(0),col(0),data(NULL){}
     ~CMatrix(){if(data!=NULL) delete data; data = NULL;}
@@ -29,7 +26,7 @@ public:
 		for (int y = 0; y < dstHeight; y++)
 		{
 
-			memcpy(data+srcOffsetY*dstWidth,pData + (srcOffsetY + y)*srcWidth+srcOffsetX,dstHeight)
+			memcpy(data + y*dstWidth, pData + (srcOffsetY + y)*srcWidth + srcOffsetX, dstWidth);
 		}
 	}
 	void Reset(int r, int c) const
@@ -48,5 +45,9 @@ public:
 	
 		memset(data, 0, row*col);
 	}
+private:
+	mutable int row, col;
+	mutable T * data;
+
 };
 #endif //__MATRIX_H__
