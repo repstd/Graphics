@@ -166,16 +166,21 @@ public:
 	~LODDrawable();
 
 	void init(char* heightFiledMap);
-	void init(BYTE* heightMat, int width, int height);
+	void init(BYTE* heightMat, const int width, const int height,const int centerX,const int centerY);
 
 private:
-	void drawImplementation(osg::RenderInfo& renderInfo) const;
+	void initParams();
 	bool loadRawData(const char* fileName);
 	bool loadHeightField(const char* filename);
+
+	void drawImplementation(osg::RenderInfo& renderInfo) const;
+	void BFSRender() const;
+
+
+
 	int   GetHeight(int x, int y) const;
 	float GetAveHeight(float x, float y) const;
 
-	void BFSRender() const;
 	void DrawNode(int cx, int cy, int dx,int dy) const;
 	void DrawPrim(int cx, int cy) const;
 
@@ -186,8 +191,6 @@ private:
 	void CheckNeighbor(int cx, int cy, int dx,int dy) const;
 	unsigned char CanActive(int x, int y, int pitchSizeX, int pitchSizeY) const;
 	VECTOR getNormal(int x, int y, int dx,int dy) const;
-
-
 
 	void CalculateDHMatrix();
 	void DrawPrim_FILL(int x, int y) const;
@@ -200,11 +203,10 @@ private:
 private:
 	
 
-
-
 	float m_fc;     
 	float m_fC;    
-	int   m_nSizeX,m_nSizeY;  
+	int   m_nSizeX,m_nSizeY; 
+	int	 m_centerX, m_centerY;
 	mutable float m_ViewX, m_ViewY, m_ViewZ;
 	PatchSize   m_delta[30];
 

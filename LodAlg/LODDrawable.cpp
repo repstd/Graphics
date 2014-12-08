@@ -62,12 +62,9 @@ LODDrawable::LODDrawable()
 LODDrawable::~LODDrawable()
 {
 }
-void LODDrawable::init(char* heightFiledMap)
+
+void LODDrawable::initParams()
 {
-	DEBUG_LOG_INIT
-	
-	loadRawData(heightFiledMap);
-	//loadHeightField(heightFiledMap);
 	m_fC = 3;
 	m_fc = 1.5;
 	m_fScale = 1.0;
@@ -90,8 +87,73 @@ void LODDrawable::init(char* heightFiledMap)
 		sizeY = sizeY >> 1;
 		//		m_maxlevel++;
 	}
+
 }
-void LODDrawable::init(BYTE* heightMat, int width, int height)
+
+
+bool LODDrawable::loadRawData(const char* filename)
+{
+	FILE *fp = fopen(filename, "rb");
+	if (fp == NULL)
+	{
+		return false;
+	}
+
+	long sz;
+	fseek(fp, 0, std::ios::end);
+	sz = ftell(fp);
+	fseek(fp, 0, std::ios::beg);
+	m_nSizeX = (sqrt(double(sz)) - 1) / 2 + 1;
+	//TODO: fix me. We should handle the case that the terrain differs in height and width.
+	m_nSizeY = m_nSizeX;
+
+	BYTE* tempHeightMap = new BYTE[m_nSizeX*m_nSizeY];
+	fread(tempHeightMap, 1, m_nSizeX*m_nSizeY, fp);
+	m_HMMatrix.Reset(m_nSizeX, m_nSizeY);
+	m_HMMatrix.SetData(tempHeightMap);
+	delete[] tempHeightMap;
+	fclose(fp);
+
+	return true;
+}
+bool LODDrawable::loadHeightField(const char* filename)
+{
+	GDALAllRegister();
+
+	GDALDriver* pDriver = GetGDALDriverManager()->GetDriverByName("JPEG");
+	if (pDriver == NULL)
+		return false;
+	GDALDataset* pData = (GDALDataset*)GDALOpen(filename, GA_ReadOnly);
+	int width = pData->GetRasterXSize();
+	int height = pData->GetRasterYSize();
+	int channel = pData->GetRasterCount();
+	//if (channel > 1)
+	//	return false;
+	//else
+	//TODO : RGB2Gray
+
+	m_nSizeX = width;
+	m_nSizeY = height;
+	BYTE* tempHeightMap = (BYTE*)calloc(1, height*width * 1);
+	pData->RasterIO(GF_Read, 0, 0, width, height, tempHeightMap, width, height, GDT_Byte, 1, NULL, 0, 0, 1);
+
+	m_HMMatrix.Reset(m_nSizeX, m_nSizeY);
+	m_HMMatrix.SetData(tempHeightMap);
+	delete[] tempHeightMap;
+	GDALClose(pData);
+	GDALDestroyDriverManager();
+	return true;
+
+}
+void LODDrawable::init(char* heightFiledMap)
+{
+	DEBUG_LOG_INIT
+	
+	loadRawData(heightFiledMap);
+	//loadHeightField(heightFiledMap);
+	initParams();
+}
+void LODDrawable::init(BYTE* heightMat, const int width, const int height,const int centerX,const int enterY)
 {
 
 	assert(sizeX == sizeY && sizeX && sizeY);
@@ -102,28 +164,8 @@ void LODDrawable::init(BYTE* heightMat, int width, int height)
 	m_HMMatrix.Reset(m_nSizeX, m_nSizeY);
 	m_HMMatrix.SetData(heightMat);
 
-	m_fC = 3;
-	m_fc = 1.5;
-	m_fScale = 1.0;
-	m_LodMatrix.Reset(m_nSizeX, m_nSizeY);
-	m_DHMatrix.Reset(m_nSizeX, m_nSizeY);
-	for (int i = 0; i < m_nSizeX; i++)
-	for (int j = 0; j < m_nSizeY; j++)
-		m_LodMatrix(i, j) = VS_UNREACH;
-	CalculateDHMatrix();
 
-	int sizeX = m_nSizeX - 1;
-	int sizeY = m_nSizeY - 1;
-
-	//	m_maxlevel = -2;
-	for (int i = 0; sizeX&&sizeY; i++)
-	{
-		this->m_delta[i]._x = sizeX / 2;
-		this->m_delta[i]._y = sizeY / 2;
-		sizeX = sizeX >> 1;
-		sizeY = sizeY >> 1;
-		//		m_maxlevel++;
-	}
+	initParams();
 
 
 }
@@ -424,60 +466,6 @@ void LODDrawable::BFSRender() const
 //
 //}
 
-bool LODDrawable::loadRawData(const char* filename)
-{
-	FILE *fp = fopen(filename, "rb");
-	if (fp == NULL)
-	{
-		return false;
-	}
-	
-	long sz;
-	fseek(fp, 0, std::ios::end);
-	sz = ftell(fp);
-	fseek(fp, 0, std::ios::beg);
-	m_nSizeX = sqrt(double(sz));
-	//TODO: fix me. We should handle the case that the terrain differs in height and width.
-	m_nSizeY = m_nSizeX;
-
-	BYTE* tempHeightMap = new BYTE[m_nSizeX*m_nSizeY];
-	fread(tempHeightMap, 1, m_nSizeX*m_nSizeY, fp);
-	m_HMMatrix.Reset(m_nSizeX, m_nSizeY);
-	m_HMMatrix.SetData(tempHeightMap);
-	delete[] tempHeightMap;
-	fclose(fp);
-
-	return true;
-}
-bool LODDrawable::loadHeightField(const char* filename)
-{
-	GDALAllRegister();
-
-	GDALDriver* pDriver = GetGDALDriverManager()->GetDriverByName("JPEG");
-	if (pDriver == NULL)
-		return false;
-	GDALDataset* pData = (GDALDataset*)GDALOpen(filename, GA_ReadOnly);
-	int width = pData->GetRasterXSize();
-	int height = pData->GetRasterYSize();
-	int channel = pData->GetRasterCount();
-	//if (channel > 1)
-	//	return false;
-	//else
-	//TODO : RGB2Gray
-
-	m_nSizeX = width;
-	m_nSizeY = height;
-	BYTE* tempHeightMap = (BYTE*)calloc(1, height*width * 1);
-	pData->RasterIO(GF_Read, 0, 0, width, height, tempHeightMap, width, height, GDT_Byte, 1, NULL, 0, 0, 1);
-
-	m_HMMatrix.Reset(m_nSizeX, m_nSizeY);
-	m_HMMatrix.SetData(tempHeightMap);
-	delete[] tempHeightMap;
-	GDALClose(pData);
-	GDALDestroyDriverManager();
-	return true;
-
-}
 int  LODDrawable::GetHeight(int x, int z) const
 {
 
@@ -624,6 +612,7 @@ unsigned char LODDrawable::CanActive(int x, int y, int patchSizeX, int patchSize
 		return VS_DISABLE;
 	//int size = 2*d;
 	int d = patchSizeX >> 1;
+	int z = GetHeight(x, y);
 	VECTOR observeVec = VECTOR(x - m_nSizeX / 2 - m_ViewX, y - m_nSizeY / 2 - m_ViewY, z - 100 - m_ViewZ);
 	float fViewDistance = observeVec.length();
 	float f;
@@ -777,7 +766,7 @@ void LODDrawable::DrawPrim(int cx, int cy) const
 //}
 #define GLVERTEX(x, z)\
 {\
-	glVertex3f(x - m_nSizeX / 2, z - m_nSizeY / 2, GetHeight(x, z) - 100); \
+	glVertex3f(x + m_centerX - m_nSizeX / 2, z+m_centerY - m_nSizeY / 2, GetHeight(x, z) - 100); \
 }
 
 void LODDrawable::DrawNode_FILL(int x, int z, int d, int dy) const
