@@ -624,6 +624,7 @@ unsigned char LODDrawable::CanActive(int x, int y, int patchSizeX, int patchSize
 		return VS_DISABLE;
 	//int size = 2*d;
 	int d = patchSizeX >> 1;
+	int z = GetHeight(x, y);
 	VECTOR observeVec = VECTOR(x - m_nSizeX / 2 - m_ViewX, y - m_nSizeY / 2 - m_ViewY, z - 100 - m_ViewZ);
 	float fViewDistance = observeVec.length();
 	float f;
