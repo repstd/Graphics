@@ -165,7 +165,7 @@ void LODDrawable::init(BYTE* heightMat, const int width, const int height,const 
 	m_HMMatrix.SetData(heightMat);
 
 
-	initParams();
+	//initParams();
 
 
 }
