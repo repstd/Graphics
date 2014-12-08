@@ -139,7 +139,7 @@ void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 	glLoadIdentity();
 	glMatrixMode(GL_PROJECTION);
 
-	gluLookAt(eye.x(), eye.y(), eye.z(), at.x(), at.y(), at.z(), up.x(), up.y(), up.z());
+//	gluLookAt(eye.x(), eye.y(), eye.z(), at.x(), at.y(), at.z(), up.x(), up.y(), up.z());
 
 	//DEBUG_ENCODE_MSG("Eye Center: %f,%f,%f,Eye At: %f,%f,%f,%f",
 	//														eye.x(), eye.y(), eye.z(),
