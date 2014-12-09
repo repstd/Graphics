@@ -67,7 +67,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	
 	viewer.realize();
 	viewer.getCamera()->getGraphicsContext()->makeCurrent();
-
+	viewer.setDataVariance(osg::Object::DYNAMIC);
 	osg::Matrixd mat = viewer.getCamera()->getViewMatrix();
 
 

@@ -63,6 +63,8 @@ LODDrawable::LODDrawable()
 LODDrawable::~LODDrawable()
 {
 }
+
+
 void LODDrawable::init(const char* filename)
 {
 
@@ -91,11 +93,12 @@ void LODDrawable::init(const char* filename)
 	BYTE* tempHeightMap = new BYTE[m_rglobalPara._width*m_rglobalPara._height];
 	fread(tempHeightMap, 1, m_rglobalPara._width*m_rglobalPara._height, fp);
 
+	PTileThread pTile = new TileThread;
+	
+	pTile->init(tempHeightMap, m_rglobalPara, m_rglobalPara);
 
-	TileThread* tile = new TileThread();
-	//tile->Init();
-	tile->init(tempHeightMap, m_rglobalPara, m_rglobalPara);
-	m_vecTile.push_back(*tile);
+	
+	m_vecTile.push_back(pTile);
 
 	m_vecRange.push_back(m_rglobalPara);
 
@@ -120,23 +123,16 @@ void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 	gluLookAt(eye.x(), eye.y(), eye.z(), at.x(), at.y(), at.z(), up.x(), up.y(), up.z());
 
 	int sz = m_vecTile.size();
-	std::vector<boost::thread> m_threadPool;
 	for (int i = 0; i < sz; i++)
 	{
-		m_vecTile[i].updateCameraInfo(eye);
-		//m_vecTile[i].BFSRender();
+		//m_vecTile[i].updateCameraInfo(eye);
+		////m_vecTile[i].BFSRender();
 
 		//m_vecTile[i].start();
-
-		m_threadPool.push_back(boost::thread(m_vecTile[i]));
+		m_vecTile[i]->updateCameraInfo(eye);
+		m_vecTile[i]->startThread();
 	}
-	for (int i = 0; i < sz; i++)
-	{
-
-		m_threadPool[i].join();
-	}
-	
-	
+	printf("Rendring Ended.\n");
 }
 
 
