@@ -130,7 +130,7 @@ void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 
 		//m_vecTile[i].start();
 		m_vecTile[i]->updateCameraInfo(eye);
-		m_vecTile[i]->startThread();
+		m_vecTile[i]->BFSRender();
 	}
 	printf("Rendring Ended.\n");
 }

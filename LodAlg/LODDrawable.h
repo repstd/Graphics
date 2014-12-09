@@ -34,6 +34,10 @@ public:
 	
 		m_pTile->updateCameraInfo(eye);
 	}
+	void BFSRender()
+	{
+		m_pTile->BFSRender();
+	}
 
 	LODTile* m_pTile;
 	
