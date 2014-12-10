@@ -51,8 +51,8 @@ void LODTile::initParams()
 			m_LodMatrix(i, j) = VS_UNREACH;
 	CalculateDHMatrix();
 
-	int sizeX = m_rlocalPara._width - 1;
-	int sizeY = m_rlocalPara._height - 1;
+	int sizeX = m_rlocalPara._width-1;
+	int sizeY = m_rlocalPara._height-1;
 
 	//	m_maxlevel = -2;
 	for (int i = 0; sizeX&&sizeY; i++)
@@ -69,14 +69,17 @@ void LODTile::initParams()
 void LODTile::init(BYTE* heightMat, const Range globalRange, const Range localRange)
 {
 
-
-
 	m_rlocalPara = localRange;
 	m_rglobalPara = globalRange;
-	/*int offsetX = globalRange._centerX - ((globalRange._width-1 )>> 1);
-	int offsetY = globalRange._centerY - ((globalRange._height - 1) >> 1);*/
-	int offsetX =0;
-	int offsetY =0;
+	//int offsetX = localRange._centerX - ((localRange._width - 1) >> 1);
+	//int offsetY = localRange._centerY - ((localRange._height - 1) >> 1);
+	//int offsetY = (localRange._N - 1 - localRange._index_i)*globalRange._width + localRange._index_j*
+	//int offsetX = (localRange._N - 1 - localRange._index_j)*localRange._width;
+
+	int offsetX = localRange._index_j*localRange._width;
+	int offsetY = (localRange._N - 1 - localRange._index_i)*localRange._height;
+	//int offsetY = localRange._index_i*localRange._width;
+
 	m_HMMatrix.Reset(m_rlocalPara._width, m_rlocalPara._height);
 
 	m_HMMatrix.SetData(heightMat, offsetX, offsetY, globalRange._width, globalRange._height, localRange._width, localRange._height);
@@ -108,9 +111,10 @@ void LODTile::BFSRender() const
 	int level = 0, i = 0;
 	int dx = m_delta[0]._x;
 	int dy = m_delta[0]._y;
-	int cx = m_rlocalPara._centerX;
-	int cy = m_rlocalPara._centerY;
-
+	int cx = (m_rlocalPara._width-1)/2+1;
+	int cy = (m_rlocalPara._height - 1) / 2+1;
+	//int cx = (m_rlocalPara._width ) / 2;
+	//int cy = (m_rlocalPara._height) / 2;
 	LNODE node(cx, cy, 0);
 	cur_Queue->push_back(node);
 	while (dx > 0 && dy > 0)
@@ -180,8 +184,11 @@ void LODTile::BFSRender() const
 int  LODTile::GetHeight(int x, int z) const
 {
 
-	return (m_HMMatrix(x, z)*m_fScale);
 
+	//return (m_HMMatrix(m_rlocalPara._height - 1 - x, m_rlocalPara._height - 1-z)*m_fScale);
+
+	return (m_HMMatrix(x, z)*m_fScale);
+	//return m_rlocalPara._centerX*0.2 + m_rlocalPara._centerY*0.2;
 }
 
 
@@ -324,7 +331,15 @@ unsigned char LODTile::CanActive(int x, int y, int patchSizeX, int patchSizeY) c
 	//int size = 2*d;
 	int d = patchSizeX >> 1;
 	int z = GetHeight(x, y);
-	VECTOR observeVec = VECTOR(x - m_rlocalPara._width / 2 - m_ViewX, y - m_rlocalPara._height / 2 - m_ViewY, z - 100 - m_ViewZ);
+	int lx, ly, lz;
+	lx = x;
+	ly = y;
+	lz = z;
+	local2Global(lx, ly, lz);
+	//VECTOR observeVec = VECTOR(x - m_rlocalPara._width / 2 - m_ViewX, y - m_rlocalPara._height / 2 - m_ViewY, z - 100 - m_ViewZ);
+
+	VECTOR observeVec = VECTOR(lx - m_ViewX, ly- m_ViewY, lz - m_ViewZ);
+
 	float fViewDistance = observeVec.length();
 	float f;
 	float cosAngle = 0.0;
@@ -345,7 +360,7 @@ unsigned char LODTile::CanActive(int x, int y, int patchSizeX, int patchSizeY) c
 	//	return VS_DISABLE;
 	if (fViewDistance > MAX_DIS)
 		return VS_DISABLE;
-	f = fViewDistance / (patchSizeX*abs(cosAngle)*m_fC*max(m_fc*m_DHMatrix(x, z), 1.0f));
+	f = fViewDistance / (patchSizeX*abs(cosAngle)*m_fC*max(m_fc*m_DHMatrix(x, y), 1.0f));
 	//f = fViewDistance / (patchSizeX*m_fC*max(m_fc*m_DHMatrix(x, z), 1.0f));
 
 	if (f < 0.1f)
@@ -482,8 +497,8 @@ void LODTile::DrawPrim(int cx, int cy) const
 
 inline void LODTile::local2Global(int& x, int& y, int& z) const
 {
-	x += m_rlocalPara._centerX - m_rglobalPara._centerY - m_rglobalPara._width >> 1;
-	y += y + m_rlocalPara._centerY - m_rglobalPara._centerY - m_rglobalPara._height >> 1;
+	x += (m_rlocalPara._centerX - m_rlocalPara._width/2- m_rglobalPara._width / 2);
+	y += (m_rlocalPara._centerY - m_rlocalPara._height/2- m_rglobalPara._height / 2);
 	z -= 100;
 }
 inline void LODTile::GLVERTEX(int x, int y) const

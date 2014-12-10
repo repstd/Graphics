@@ -156,10 +156,10 @@ typedef struct _PatchSize
 typedef struct _Range
 {
 
-	int _width;
-	int _height;
-	int _centerX;
-	int _centerY;
+	int _width,_height;
+	int _centerX,_centerY;
+	int _index_i, _index_j;
+	int _N;
 } Range;
 
 

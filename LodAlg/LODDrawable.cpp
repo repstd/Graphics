@@ -56,7 +56,7 @@ LODDrawable::LODDrawable()
 	glViewport(0, 0, 1280, 720);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45, (float)1280 / (float)720, 0, 100);
+	gluPerspective(45, (float)1280 / (float)720, 0, 20);
 
 }
 
@@ -86,21 +86,45 @@ void LODDrawable::init(const char* filename)
 	//TODO: fix me. We should handle the case that the terrain differs in height and width.
 	m_rglobalPara._height = m_rglobalPara._width;
 
-	m_rglobalPara._centerX = (m_rglobalPara._width - 1) >> 1;
-	m_rglobalPara._centerY = (m_rglobalPara._height - 1) >> 1;
-
+	m_rglobalPara._centerX = (m_rglobalPara._width - 1)/2 +1;
+	m_rglobalPara._centerY = (m_rglobalPara._height - 1)/2 +1;
 
 	BYTE* tempHeightMap = new BYTE[m_rglobalPara._width*m_rglobalPara._height];
 	fread(tempHeightMap, 1, m_rglobalPara._width*m_rglobalPara._height, fp);
 
-	PTileThread pTile = new TileThread;
 	
-	pTile->init(tempHeightMap, m_rglobalPara, m_rglobalPara);
+	Range tileRange[16];
+	PTileThread pTile[16];
+	int index = 0;
+	int N = 2;
+	int tileSize = (m_rglobalPara._width - 1) / N +1;
+	for (int j = 0; j < N; j++)
+	{
+
+		for (int i = 0; i < N; i++)
+		{
+
+			index = j * N + i;
+			pTile[index] = new TileThread;
+
+			tileRange[index]._width = tileRange[index]._height = tileSize;
+
+			tileRange[index]._centerX = i*tileSize + (tileSize - 1) / 2;
+
+			tileRange[index]._centerY = j*tileSize + (tileSize - 1) / 2;
+			tileRange[index]._index_i = j;
+			tileRange[index]._index_j= i;
+			tileRange[index]._N = N;
+			pTile[index]->init(tempHeightMap, m_rglobalPara, tileRange[index]);
+
+			m_vecTile.push_back(pTile[index]);
+
+			m_vecRange.push_back(tileRange[index]);
+		}
+	}
+
 
 	
-	m_vecTile.push_back(pTile);
-
-	m_vecRange.push_back(m_rglobalPara);
 
 	delete[] tempHeightMap;
 	fclose(fp);
@@ -114,7 +138,7 @@ void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 
 	osg::Vec3d eye, at, up;
 
-	camera->getViewMatrixAsLookAt(eye, at, up);
+	camera->getViewMatrixAsLookAt(eye, at, up,2.0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -125,9 +149,6 @@ void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 	int sz = m_vecTile.size();
 	for (int i = 0; i < sz; i++)
 	{
-		//m_vecTile[i].updateCameraInfo(eye);
-		////m_vecTile[i].BFSRender();
-
 		//m_vecTile[i].start();
 		m_vecTile[i]->updateCameraInfo(eye);
 		m_vecTile[i]->BFSRender();

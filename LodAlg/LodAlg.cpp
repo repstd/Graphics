@@ -66,8 +66,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	viewer.setThreadingModel(osgViewer::Viewer::SingleThreaded);
 	
 	viewer.realize();
+
 	viewer.getCamera()->getGraphicsContext()->makeCurrent();
+	viewer.getCamera()->setViewMatrix(osg::Matrix::perspective(45,1280/720, 0, 100));
 	viewer.setDataVariance(osg::Object::DYNAMIC);
+
 	osg::Matrixd mat = viewer.getCamera()->getViewMatrix();
 
 

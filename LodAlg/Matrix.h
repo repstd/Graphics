@@ -8,17 +8,17 @@ class CMatrix
 {
 
 public:
-	CMatrix():row(0),col(0),data(NULL){}
+	CMatrix() :_width(0), _height(0), data(NULL){}
     ~CMatrix(){if(data!=NULL) delete data; data = NULL;}
 	
-	T& operator()(int i, int j) const
+	T& operator()(int w, int h) const
 	{ 
-		return data[i*col + j];
+		return data[h*_width + w];
 	
 	};
 	void SetData(T *pData)
 	{	
-		memcpy(data, pData, row*col*sizeof(T));
+		memcpy(data, pData, _width*_height*sizeof(T));
 	}
 	void SetData(T *pData,int srcOffsetX,int srcOffsetY,int srcWidth,int SrcHeight,int dstWidth,int dstHeight)
 	{
@@ -26,27 +26,27 @@ public:
 		for (int y = 0; y < dstHeight; y++)
 		{
 
-			memcpy(data + y*dstWidth, pData + (srcOffsetY + y)*srcWidth + srcOffsetX, dstWidth);
+			memcpy(data + y*dstWidth, pData + (srcOffsetY + dstHeight - 1 - y)*srcWidth + srcOffsetX, dstWidth);
 		}
 	}
-	void Reset(int r, int c) const
+	void Reset(int w, int h) const
 	{
 
-		if (data != NULL && (r != row || c != col) )
+		if (data != NULL && (w != _width || h != _height))
 		{
 			
 			delete data;
 			data = NULL;
 		}
-		row = r;
-		col = c;
+		_width = w;
+		_height = h;
 		if (data == NULL)
-			data = new T[row*col];
+			data = new T[_width*_height];
 	
-		memset(data, 0, row*col);
+		memset(data, 0, _width*_height);
 	}
 private:
-	mutable int row, col;
+	mutable int _width, _height;
 	mutable T * data;
 
 };
