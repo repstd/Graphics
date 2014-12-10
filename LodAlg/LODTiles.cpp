@@ -54,14 +54,12 @@ void LODTile::initParams()
 	int sizeX = m_rlocalPara._width-1;
 	int sizeY = m_rlocalPara._height-1;
 
-	//	m_maxlevel = -2;
 	for (int i = 0; sizeX&&sizeY; i++)
 	{
 		this->m_delta[i]._x = sizeX / 2;
 		this->m_delta[i]._y = sizeY / 2;
 		sizeX = sizeX >> 1;
 		sizeY = sizeY >> 1;
-		//		m_maxlevel++;
 	}
 
 }
@@ -75,7 +73,6 @@ void LODTile::init(BYTE* heightMat, const Range globalRange, const Range localRa
 	//int offsetY = localRange._centerY - ((localRange._height - 1) >> 1);
 	//int offsetY = (localRange._N - 1 - localRange._index_i)*globalRange._width + localRange._index_j*
 	//int offsetX = (localRange._N - 1 - localRange._index_j)*localRange._width;
-
 	int offsetX = localRange._index_j*localRange._width;
 	int offsetY = (localRange._N - 1 - localRange._index_i)*localRange._height;
 	//int offsetY = localRange._index_i*localRange._width;
@@ -92,8 +89,8 @@ void LODTile::init(BYTE* heightMat, const Range globalRange, const Range localRa
 void LODTile::updateCameraInfo(osg::Vec3d& eye)
 {
 	m_ViewX = eye.x();
-	m_ViewY= -1.0*eye.z();
-	m_ViewZ = eye.y();
+	m_ViewY= eye.y();
+	m_ViewZ = eye.z();
 
 }
 
@@ -368,28 +365,6 @@ unsigned char LODTile::CanActive(int x, int y, int patchSizeX, int patchSizeY) c
 	else
 		return VS_DISABLE;
 
-	//if (cosAngle > 0)
-	//{
-	//	f = fViewDistance / (patchSizeX*abs(cosAngle)*m_fC*max(m_fc*m_DHMatrix(x, z), 1.0f));
-	//	//f = fViewDistance / (patchSizeX*m_fC*max(m_fc*m_DHMatrix(x, z), 1.0f));
-
-	//	if (f < 0.1f)
-	//		return VS_ACTIVE;
-	//	else
-	//		return VS_DISABLE;
-	//}
-
-	//else
-	//{
-
-	//	f = fViewDistance / (patchSizeX*m_fC*max(m_fc*m_DHMatrix(x, z), 1.0f));
-
-	//	if (f < 1.0f)
-	//		return VS_ACTIVE;
-	//	else
-	//		return VS_DISABLE;
-	//}
-
 }
 
 void LODTile::DisableNode(int cx, int cy, int dx, int dy) const
@@ -497,8 +472,8 @@ void LODTile::DrawPrim(int cx, int cy) const
 
 inline void LODTile::local2Global(int& x, int& y, int& z) const
 {
-	x += (m_rlocalPara._centerX - m_rlocalPara._width/2- m_rglobalPara._width / 2);
-	y += (m_rlocalPara._centerY - m_rlocalPara._height/2- m_rglobalPara._height / 2);
+	x += (m_rlocalPara._centerX - m_rlocalPara._width/2-m_rglobalPara._width/2);
+	y += (m_rlocalPara._centerY - m_rlocalPara._height / 2-m_rglobalPara._height / 2);
 	z -= 100;
 }
 inline void LODTile::GLVERTEX(int x, int y) const
@@ -538,10 +513,30 @@ void LODTile::DrawNode_FILL(int x, int z, int d, int dy) const
 	glEnd();
 }
 
+
+#define APPLY_COLOR(index)\
+{\
+	switch (index)\
+	{		\
+	case 0:\
+		glColor3f(1, 1, 1); break; \
+	case 1:\
+		glColor3f(1, 0, 0); break; \
+	case 2:\
+		glColor3f(0, 1, 0); break; \
+	case 3:\
+		glColor3f(0, 0, 1); break; \
+	default:\
+		glColor3f(1, 0.5, 1); break; \
+	}\
+}
 void LODTile::DrawNode_FRAME(int x, int z, int dx, int dy) const
 {
+	
+
 	glPushAttrib(GL_COLOR);
-	glColor3f(1, 1, 1);
+	APPLY_COLOR(m_rlocalPara._index_i*m_rlocalPara._N + m_rlocalPara._index_j);
+	//glColor3f(1, 1, 1);
 	glBegin(GL_LINE_STRIP);
 	GLVERTEX(x + dx, z - dy);
 	GLVERTEX(x, z);

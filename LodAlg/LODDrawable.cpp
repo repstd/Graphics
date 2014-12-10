@@ -53,10 +53,7 @@ LODDrawable::LODDrawable()
 
 {
 	setSupportsDisplayList(false);
-	glViewport(0, 0, 1280, 720);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45, (float)1280 / (float)720, 0, 20);
+
 
 }
 
@@ -83,7 +80,7 @@ void LODDrawable::init(const char* filename)
 
 	m_rglobalPara._width = sqrt(double(sz));
 
-	//TODO: fix me. We should handle the case that the terrain differs in height and width.
+	//TODO: fix me. We should handle the case that the terrain differs in height and width.@yulw
 	m_rglobalPara._height = m_rglobalPara._width;
 
 	m_rglobalPara._centerX = (m_rglobalPara._width - 1)/2 +1;
@@ -132,6 +129,8 @@ void LODDrawable::init(const char* filename)
 	return;
 
 }
+
+
 void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 {
 	osg::ref_ptr<osg::Camera> camera = renderInfo.getCurrentCamera();
@@ -153,7 +152,6 @@ void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 		m_vecTile[i]->updateCameraInfo(eye);
 		m_vecTile[i]->BFSRender();
 	}
-	printf("Rendring Ended.\n");
 }
 
 
