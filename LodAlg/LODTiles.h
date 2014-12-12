@@ -172,8 +172,10 @@ public:
 	void init(BYTE* heightMat, const Range globalRange,const Range localRange);
 	void updateCameraInfo(osg::Vec3d& eye);
 
+	int   GetHeight(int x, int y) const;
 
 	void BFSRender() const;
+
 
 private:
 
@@ -183,7 +185,6 @@ private:
 	inline void GLVERTEX(int x, int y) const;
 	inline void local2Global(int& x, int& y, int& z) const;
 
-	int   GetHeight(int x, int y) const;
 	float GetAveHeight(float x, float y) const;
 
 	void DrawNode(int cx, int cy, int dx, int dy) const;
@@ -204,6 +205,8 @@ private:
 	void DrawNode_FILL(int x, int y, int dx, int dy) const;
 	//void DrawNode_TEXTURE(int x, int y, int d);
 	void DrawNode_FRAME(int x, int y, int dx, int dy) const;
+
+
 
 private:
 

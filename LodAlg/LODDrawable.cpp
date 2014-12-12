@@ -12,6 +12,7 @@
 #include <gdal_priv.h>
 #include <osgDB/Registry>
 #include <osgDB/WriteFile>
+#include "LODManipulator.h"
 #define MAX_DIS 700.0
 void saveBMP(int width, int height, int channel, BYTE* data, char* filename, int pixelFormat = GL_BGR)
 {
@@ -27,27 +28,6 @@ void saveBMP(int width, int height, int channel, BYTE* data, char* filename, int
 
 	m_bmpWirter->writeImage(*img, filename);
 }
-#define _DEBUG_FILENAME_ "./pos.txt"
-#define _DEBUG_ENCODE_MSG(filename,format,data) \
-{\
-	FILE* fp = fopen(filename, "a+"); \
-	char buf[MAX_PATH]; \
-	sprintf(buf, format, data); \
-	fwrite(buf, strlen(buf), 1, fp); \
-	fclose(fp); \
-}
-
-
-
-#define _DEBUG_LOG_INIT(filename)\
-{\
-	FILE* fp = fopen(filename, "w"); \
-	fclose(fp); \
-}
-
-#define DEBUG_LOG_INIT _DEBUG_LOG_INIT(_DEBUG_FILENAME_)
-
-#define DEBUG_ENCODE_MSG(format,data,...) _DEBUG_ENCODE_MSG(_DEBUG_FILENAME_,format,data)
 
 LODDrawable::LODDrawable()
 
@@ -86,14 +66,12 @@ void LODDrawable::init(const char* filename)
 	m_rglobalPara._centerX = (m_rglobalPara._width - 1)/2 +1;
 	m_rglobalPara._centerY = (m_rglobalPara._height - 1)/2 +1;
 
-	BYTE* tempHeightMap = new BYTE[m_rglobalPara._width*m_rglobalPara._height];
+	BYTE* tempHeightMap = new BYTE[m_rglobalPara._width*m_rglobalPara._height]; 
 	fread(tempHeightMap, 1, m_rglobalPara._width*m_rglobalPara._height, fp);
-
-	
 	Range tileRange[16];
-	PTileThread pTile[16];
-	int index = 0;
-	int N = 2;
+	TileThread pTile[16]; 
+	int index = 0; 
+	int N = 1;
 	int tileSize = (m_rglobalPara._width - 1) / N +1;
 	for (int j = 0; j < N; j++)
 	{
@@ -102,7 +80,7 @@ void LODDrawable::init(const char* filename)
 		{
 
 			index = j * N + i;
-			pTile[index] = new TileThread;
+			//pTile[index] = new TileThread;
 
 			tileRange[index]._width = tileRange[index]._height = tileSize;
 
@@ -112,7 +90,7 @@ void LODDrawable::init(const char* filename)
 			tileRange[index]._index_i = j;
 			tileRange[index]._index_j= i;
 			tileRange[index]._N = N;
-			pTile[index]->init(tempHeightMap, m_rglobalPara, tileRange[index]);
+			pTile[index].init(tempHeightMap, m_rglobalPara, tileRange[index]);
 
 			m_vecTile.push_back(pTile[index]);
 
@@ -138,19 +116,19 @@ void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 	osg::Vec3d eye, at, up;
 
 	camera->getViewMatrixAsLookAt(eye, at, up,2.0);
-
+	
+	_LOG_MATRIX(camera->getViewMatrix(), "drawImplementation");
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glMatrixMode(GL_PROJECTION);
 
 	gluLookAt(eye.x(), eye.y(), eye.z(), at.x(), at.y(), at.z(), up.x(), up.y(), up.z());
-
 	int sz = m_vecTile.size();
 	for (int i = 0; i < sz; i++)
 	{
 		//m_vecTile[i].start();
-		m_vecTile[i]->updateCameraInfo(eye);
-		m_vecTile[i]->BFSRender();
+		m_vecTile[i].updateCameraInfo(eye);
+		m_vecTile[i].BFSRender();
 	}
 }
 

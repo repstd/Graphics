@@ -13,26 +13,10 @@
 #include <osgDB/WriteFile>
 #define MAX_DIS 700.0
 #define _DEBUG_FILENAME_ "./pos.txt"
-#define _DEBUG_ENCODE_MSG(filename,format,data) \
-{\
-	FILE* fp = fopen(filename, "a+"); \
-	char buf[MAX_PATH]; \
-	sprintf(buf, format, data); \
-	fwrite(buf, strlen(buf), 1, fp); \
-	fclose(fp); \
-}
-
-
-
-#define _DEBUG_LOG_INIT(filename)\
-{\
-	FILE* fp = fopen(filename, "w"); \
-	fclose(fp); \
-}
-
 #define DEBUG_LOG_INIT _DEBUG_LOG_INIT(_DEBUG_FILENAME_)
 
 #define DEBUG_ENCODE_MSG(format,data,...) _DEBUG_ENCODE_MSG(_DEBUG_FILENAME_,format,data)
+
 
 LODTile::LODTile()
 {
@@ -177,14 +161,14 @@ void LODTile::BFSRender() const
 
 }
 
-
-int  LODTile::GetHeight(int x, int z) const
+int  LODTile::GetHeight(int x, int y) const
 {
 
 
 	//return (m_HMMatrix(m_rlocalPara._height - 1 - x, m_rlocalPara._height - 1-z)*m_fScale);
-
-	return (m_HMMatrix(x, z)*m_fScale);
+	if (x < 0 || x >= m_rlocalPara._width || y < 0 || y >= m_rlocalPara._height)
+		return _LOD_ERROR;
+	return (m_HMMatrix(x, y)*m_fScale);
 	//return m_rlocalPara._centerX*0.2 + m_rlocalPara._centerY*0.2;
 }
 
@@ -474,7 +458,11 @@ inline void LODTile::local2Global(int& x, int& y, int& z) const
 {
 	x += (m_rlocalPara._centerX - m_rlocalPara._width/2-m_rglobalPara._width/2);
 	y += (m_rlocalPara._centerY - m_rlocalPara._height / 2-m_rglobalPara._height / 2);
-	z -= 100;
+
+
+	//x += (m_rlocalPara._centerX - m_rlocalPara._width / 2);
+	//y += (m_rlocalPara._centerY - m_rlocalPara._height / 2);
+	z -= 80;
 }
 inline void LODTile::GLVERTEX(int x, int y) const
 {

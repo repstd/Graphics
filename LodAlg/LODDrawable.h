@@ -1,4 +1,4 @@
-#pragma 
+#pragma once
 #include "stdafx.h"
 #include "Matrix.h"
 #include "LODTiles.h"
@@ -8,15 +8,13 @@
 #include <vector>
 #include <assert.h>
 
-class TileThread :
-	public OpenThreads::Thread
+class TileThread
 {
 public:
-	TileThread() :
-		OpenThreads::Thread()
+	TileThread()
 	{
 			m_pTile = new LODTile();
-			Init();
+	
 	}
 public:
 	virtual void run()
@@ -29,16 +27,22 @@ public:
 	{
 		m_pTile->init(heightMat, globalRange, localRange);
 	}
-	void updateCameraInfo(osg::Vec3d& eye)
+	void updateCameraInfo(osg::Vec3d& eye) const
 	{
 	
 		m_pTile->updateCameraInfo(eye);
 	}
-	void BFSRender()
+	void BFSRender() const
 	{
 		m_pTile->BFSRender();
 	}
 
+	int getHeight(int x, int y)
+	{
+	
+		return m_pTile->GetHeight(x, y);
+	}
+private:
 	LODTile* m_pTile;
 	
 
@@ -59,14 +63,24 @@ public:
 	~LODDrawable();
 
 	void init(const char* heightFiledMap);
-
+	int getFieldHeight(int index,int x, int y)
+	{
+		if (index >= m_vecTile.size() || index < 0)
+			return _LOD_ERROR;
+		return m_vecTile[index].getHeight(x, y);
+	}
+	Range getLODRange()
+	{
+	
+		return m_rglobalPara;
+	}
 private:
 
 
 	void drawImplementation(osg::RenderInfo& renderInfo) const;
 
 
-	std::vector<PTileThread> m_vecTile;
+	std::vector<TileThread> m_vecTile;
 	std::vector<Range> m_vecRange;
 	Range m_rglobalPara;
 

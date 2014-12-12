@@ -18,3 +18,29 @@
 #include <gl\gl.h>				 
 #include <gl\glu.h>
 #include <tchar.h>
+
+
+
+#define _DEBUG_ENCODE_MSG(filename,format,data) \
+{\
+	FILE* fp = fopen(filename, "a+"); \
+	char buf[MAX_PATH]; \
+	sprintf(buf, format, data); \
+	fwrite(buf, strlen(buf), 1, fp); \
+	fclose(fp); \
+}
+
+
+
+#define _DEBUG_LOG_INIT(filename)\
+{\
+	FILE* fp = fopen(filename, "w"); \
+	fclose(fp); \
+}
+
+enum _LOD_STATUS
+{
+	_LOD_ERROR =0x1000,
+	_LOD_SUCCESS = 0x0100
+
+};

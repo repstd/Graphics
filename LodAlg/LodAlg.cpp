@@ -12,8 +12,9 @@
 #include <osgGA/DriveManipulator>
 #include <osgGA/FirstPersonManipulator>
 #include <osgGA/TerrainManipulator>
-
+#include <osgGA/StandardManipulator>
 #include <osgGA/GUIEventHandler>
+#include "LODManipulator.h"
 #include <osg/Node>
 #include <osg/BlendFunc>
 #include <OpenThreads\Thread>
@@ -83,9 +84,6 @@ public:
 int _tmain(int argc, _TCHAR* argv[])
 {
 
-
-
-
 	osgViewer::Viewer viewer;
 
 
@@ -96,15 +94,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	viewer.realize();
 
 	osg::Matrixd cameraRotation;
-	cameraRotation.makeRotate(
-		osg::DegreesToRadians(0.0), osg::Vec3(0, 1, 0), 
-		osg::DegreesToRadians(0.0), osg::Vec3(1, 0, 0), 
-		osg::DegreesToRadians(180.0), osg::Vec3(0, 0, 1));
+	cameraRotation.makeRotate(osg::DegreesToRadians(180.0), osg::Z_AXIS);
 
 
 
-	viewer.getCamera()->setViewMatrix(osg::Matrix::perspective(45, 1280 / 720, 0, 100)*cameraRotation);
-	//viewer.getCamera()->setPreDrawCallback(new camDrawcallback());
+	
 	viewer.getCamera()->getGraphicsContext()->makeCurrent();
 	
 	viewer.setDataVariance(osg::Object::DYNAMIC);
@@ -113,6 +107,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	LODDrawable* lod = new LODDrawable();
 	lod->init(_HEIGHT_FIELD_FILE_RAW);
 	lod->setName("LOD");
+
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 	geode->addDrawable(lod);
 	
@@ -120,7 +115,19 @@ int _tmain(int argc, _TCHAR* argv[])
 	geode->getOrCreateStateSet()->setAttributeAndModes(new osg::BlendFunc);
 	geode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
 	geode->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-	viewer.setCameraManipulator(new osgGA::TerrainManipulator());
+	//osgGA::FirstPersonManipulator* manipulator = new osgGA::FirstPersonManipulator();
+
+
+	LODManipulator* manipulator = new LODManipulator(lod);
+
+	osg::Matrixd vm;
+	int initZ = lod->getFieldHeight(0, lod->getLODRange()._centerX, lod->getLODRange()._centerY);
+	vm.makeLookAt(osg::Vec3d(0, 3, initZ), osg::Vec3d(0, 2, initZ), osg::Vec3d(0, 0, 1));
+	manipulator->setByMatrix(vm);
+	//manipulator->setUserData(lod);
+	viewer.setCameraManipulator(manipulator);
+	//viewer.setCameraManipulator(new osgGA::FirstPersonManipulator());
+
 	viewer.setSceneData(geode);
 	viewer.setRunMaxFrameRate(90);
 	viewer.addEventHandler(new  osgViewer::StatsHandler);
