@@ -25,8 +25,7 @@ public:
 
 		for (int y = 0; y < dstHeight; y++)
 		{
-
-			memcpy(data + y*dstWidth, pData + (srcOffsetY + dstHeight - 1 - y)*srcWidth + srcOffsetX, dstWidth);
+			memcpy(data + y*dstWidth, pData + ((srcOffsetY + dstHeight - 1 - y)*srcWidth + srcOffsetX)*sizeof(T), dstWidth*sizeof(T));
 		}
 	}
 	void Reset(int w, int h) const

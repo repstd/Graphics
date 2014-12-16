@@ -75,8 +75,8 @@ bool LODManipulator::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
 
 	switch (ea.getEventType())
 	{
-	//case GUIEventAdapter::MOVE:
-	//	return handleMouseMove(ea, us);
+	case GUIEventAdapter::MOVE:
+		return handleMouseMove(ea, us);
 
 	//case GUIEventAdapter::DRAG:
 	//	return handleMouseDrag(ea, us);
@@ -105,7 +105,7 @@ bool LODManipulator::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
 
 bool LODManipulator::handleMouseMove(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us)
 {
-
+	
 	return true;
 }
 bool LODManipulator::handleMouseDrag(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us)
@@ -160,7 +160,11 @@ bool LODManipulator::handleKeyDown(const osgGA::GUIEventAdapter& ea, osgGA::GUIA
 	tl.makeTranslate(trans);
 
 	_LOG_MATRIX(tl, "translate\n");
-	m_posZ = m_LOD->getFieldHeight(0, m_posX, m_posY);
+	int N = m_LOD->getLODRange()._N;
+	int tileX = (m_LOD->getLODRange()._width-1) / N+1;
+	int tileY = (m_LOD->getLODRange()._width-1) / N+1;
+
+	m_posZ = m_LOD->getFieldHeight(0, m_posX%tileX, m_posY%tileY);
 	m_viewMatrix.set(m_viewMatrix*tl);
 	return true;
 

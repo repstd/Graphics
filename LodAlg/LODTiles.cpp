@@ -53,13 +53,8 @@ void LODTile::init(BYTE* heightMat, const Range globalRange, const Range localRa
 
 	m_rlocalPara = localRange;
 	m_rglobalPara = globalRange;
-	//int offsetX = localRange._centerX - ((localRange._width - 1) >> 1);
-	//int offsetY = localRange._centerY - ((localRange._height - 1) >> 1);
-	//int offsetY = (localRange._N - 1 - localRange._index_i)*globalRange._width + localRange._index_j*
-	//int offsetX = (localRange._N - 1 - localRange._index_j)*localRange._width;
-	int offsetX = localRange._index_j*localRange._width;
-	int offsetY = (localRange._N - 1 - localRange._index_i)*localRange._height;
-	//int offsetY = localRange._index_i*localRange._width;
+	int offsetX = localRange._index_i*localRange._width;
+	int offsetY = (localRange._N - 1 - localRange._index_j)*localRange._height;
 
 	m_HMMatrix.Reset(m_rlocalPara._width, m_rlocalPara._height);
 
@@ -92,8 +87,9 @@ void LODTile::BFSRender() const
 	int level = 0, i = 0;
 	int dx = m_delta[0]._x;
 	int dy = m_delta[0]._y;
-	int cx = (m_rlocalPara._width-1)/2+1;
-	int cy = (m_rlocalPara._height - 1) / 2+1;
+	//Here we should use cx(y)=(w(h)-1)/2 instead of (w(h)-1)/1+1;	
+	int cx =floor(float (m_rlocalPara._width)/2);
+	int cy =floor(float (m_rlocalPara._height)/2);
 	//int cx = (m_rlocalPara._width ) / 2;
 	//int cy = (m_rlocalPara._height) / 2;
 	LNODE node(cx, cy, 0);
@@ -458,11 +454,7 @@ inline void LODTile::local2Global(int& x, int& y, int& z) const
 {
 	x += (m_rlocalPara._centerX - m_rlocalPara._width/2-m_rglobalPara._width/2);
 	y += (m_rlocalPara._centerY - m_rlocalPara._height / 2-m_rglobalPara._height / 2);
-
-
-	//x += (m_rlocalPara._centerX - m_rlocalPara._width / 2);
-	//y += (m_rlocalPara._centerY - m_rlocalPara._height / 2);
-	z -= 80;
+	z -= 100;
 }
 inline void LODTile::GLVERTEX(int x, int y) const
 {
@@ -470,12 +462,7 @@ inline void LODTile::GLVERTEX(int x, int y) const
 	int lx = x;
 	int ly = y;
 	local2Global(lx, ly, z);
-
 	glVertex3f(lx, ly, z);
-
-	//glVertex3f(x + m_rlocalPara._centerX - m_rglobalPara._centerY - m_rglobalPara._width >> 1,
-	//			y + m_rlocalPara._centerY-m_rglobalPara._centerY-m_rglobalPara._height >> 1,
-	//			GetHeight(x, y) - 100); 
 
 }
 void LODTile::DrawNode_FILL(int x, int z, int d, int dy) const

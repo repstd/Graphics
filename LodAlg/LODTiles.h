@@ -173,6 +173,7 @@ public:
 	void updateCameraInfo(osg::Vec3d& eye);
 
 	int   GetHeight(int x, int y) const;
+	float GetAveHeight(float x, float y) const;
 
 	void BFSRender() const;
 
@@ -185,7 +186,6 @@ private:
 	inline void GLVERTEX(int x, int y) const;
 	inline void local2Global(int& x, int& y, int& z) const;
 
-	float GetAveHeight(float x, float y) const;
 
 	void DrawNode(int cx, int cy, int dx, int dy) const;
 	void DrawPrim(int cx, int cy) const;
@@ -211,7 +211,7 @@ private:
 private:
 
 	CMatrix<BYTE> m_HMMatrix;
-	CMatrix<unsigned char>    m_LodMatrix;
+	CMatrix<BYTE>    m_LodMatrix;
 	CMatrix<float> m_DHMatrix;
 
 	float m_fc;

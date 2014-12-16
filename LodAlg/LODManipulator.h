@@ -1,6 +1,9 @@
 #pragma once
 #include <osg/Object>
 #include <osgGA/CameraManipulator>
+#include <osgGA/DriveManipulator>
+#include <osgGA/FirstPersonManipulator>
+#include <osgGA/TerrainManipulator>
 #include <osgGA/StandardManipulator>
 #include <osgGA/GUIEventAdapter>
 #include <osgGA/GUIActionAdapter>
@@ -21,7 +24,7 @@
 	_DEBUG_ENCODE_MSG_MANI(_MAT_FMT, _MAT_ROW(mat, 3)); \
 }
 
-class LODManipulator :public osgGA::CameraManipulator
+class LODManipulator :public osgGA::FirstPersonManipulator
 {
 public:
 
@@ -54,6 +57,7 @@ public:
 	bool handleMouseRelease(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us);
 	bool handleKeyDown(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us);
 	bool handleKeyUp(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us);
+	
 private:
 	void initPara();
 	osg::Matrixd m_viewMatrix;
@@ -66,6 +70,7 @@ private:
 	int m_posZ;
 	int m_velocityX;
 	int m_velocityY;
+	float m_fMouseX, m_fMouseY;
 	LODDrawable* m_LOD;
 };
 

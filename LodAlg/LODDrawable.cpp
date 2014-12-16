@@ -63,15 +63,17 @@ void LODDrawable::init(const char* filename)
 	//TODO: fix me. We should handle the case that the terrain differs in height and width.@yulw
 	m_rglobalPara._height = m_rglobalPara._width;
 
-	m_rglobalPara._centerX = (m_rglobalPara._width - 1)/2 +1;
-	m_rglobalPara._centerY = (m_rglobalPara._height - 1)/2 +1;
+	m_rglobalPara._centerX =floor(float (m_rglobalPara._width) /2);
+	m_rglobalPara._centerY =floor (float(m_rglobalPara._height )/2);
 
 	BYTE* tempHeightMap = new BYTE[m_rglobalPara._width*m_rglobalPara._height]; 
 	fread(tempHeightMap, 1, m_rglobalPara._width*m_rglobalPara._height, fp);
+
+
 	Range tileRange[16];
 	TileThread pTile[16]; 
 	int index = 0; 
-	int N = 1;
+	int N = 2;
 	int tileSize = (m_rglobalPara._width - 1) / N +1;
 	for (int j = 0; j < N; j++)
 	{
@@ -87,8 +89,9 @@ void LODDrawable::init(const char* filename)
 			tileRange[index]._centerX = i*tileSize + (tileSize - 1) / 2;
 
 			tileRange[index]._centerY = j*tileSize + (tileSize - 1) / 2;
-			tileRange[index]._index_i = j;
-			tileRange[index]._index_j= i;
+			
+			tileRange[index]._index_i = i;
+			tileRange[index]._index_j= j;
 			tileRange[index]._N = N;
 			pTile[index].init(tempHeightMap, m_rglobalPara, tileRange[index]);
 

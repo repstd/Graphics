@@ -40,7 +40,7 @@ public:
 	int getHeight(int x, int y)
 	{
 	
-		return m_pTile->GetHeight(x, y);
+		return m_pTile->GetAveHeight(x, y);
 	}
 private:
 	LODTile* m_pTile;

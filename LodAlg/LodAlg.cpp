@@ -121,12 +121,12 @@ int _tmain(int argc, _TCHAR* argv[])
 	LODManipulator* manipulator = new LODManipulator(lod);
 
 	osg::Matrixd vm;
-	int initZ = lod->getFieldHeight(0, lod->getLODRange()._centerX, lod->getLODRange()._centerY);
+	int initZ = lod->getFieldHeight(0, lod->getLODRange()._centerX, lod->getLODRange()._centerY)-100;
 	vm.makeLookAt(osg::Vec3d(0, 3, initZ), osg::Vec3d(0, 2, initZ), osg::Vec3d(0, 0, 1));
 	manipulator->setByMatrix(vm);
 	//manipulator->setUserData(lod);
 	viewer.setCameraManipulator(manipulator);
-	//viewer.setCameraManipulator(new osgGA::FirstPersonManipulator());
+	//viewer.setCameraManipulator(new osgGA::TerrainManipulator());
 
 	viewer.setSceneData(geode);
 	viewer.setRunMaxFrameRate(90);
