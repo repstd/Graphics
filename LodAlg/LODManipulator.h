@@ -24,7 +24,7 @@
 	_DEBUG_ENCODE_MSG_MANI(_MAT_FMT, _MAT_ROW(mat, 3)); \
 }
 
-class LODManipulator :public osgGA::FirstPersonManipulator
+class LODManipulator :public osgGA::StandardManipulator
 {
 public:
 
@@ -50,6 +50,29 @@ public:
 	virtual osg::Matrixd getInverseMatrix() const;
 
 	virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us);
+	virtual void setTransformation(const osg::Vec3d& eye, const osg::Quat& rotation)
+	{
+
+
+	}
+
+	virtual void setTransformation(const osg::Vec3d& eye, const osg::Vec3d& center, const osg::Vec3d& up)
+	{
+	
+	}
+
+	virtual void getTransformation(osg::Vec3d& eye, osg::Quat& rotation) const
+	{
+
+
+	}
+
+	virtual void getTransformation(osg::Vec3d& eye, osg::Vec3d& center, osg::Vec3d& up) const
+	{
+
+
+
+	}
 
 	bool handleMouseMove(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us);
 	bool handleMouseDrag(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us);

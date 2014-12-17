@@ -67,6 +67,12 @@ public:
 	{
 		if (index >= m_vecTile.size() || index < 0)
 			return _LOD_ERROR;
+		if (x < 0)
+			x = 0;
+		if (y < 0)
+			y = 0;
+		x %= m_vecRange[index]._width;
+		y %= m_vecRange[index]._height;
 		return m_vecTile[index].getHeight(x, y);
 	}
 	Range getLODRange()

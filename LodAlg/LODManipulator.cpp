@@ -78,8 +78,8 @@ bool LODManipulator::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAd
 	case GUIEventAdapter::MOVE:
 		return handleMouseMove(ea, us);
 
-	//case GUIEventAdapter::DRAG:
-	//	return handleMouseDrag(ea, us);
+	case GUIEventAdapter::DRAG:
+		return handleMouseDrag(ea, us);
 
 	//case GUIEventAdapter::PUSH:
 	//	return handleMousePush(ea, us);
@@ -110,7 +110,9 @@ bool LODManipulator::handleMouseMove(const osgGA::GUIEventAdapter& ea, osgGA::GU
 }
 bool LODManipulator::handleMouseDrag(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us)
 {
-
+	osg::Matrixd rot;
+	rot.makeRotate(osg::RadiansToDegrees(5.0), osg::Z_AXIS);
+	m_viewMatrix.set(m_viewMatrix*rot);
 	return true;
 
 }
@@ -128,11 +130,13 @@ bool LODManipulator::handleKeyDown(const osgGA::GUIEventAdapter& ea, osgGA::GUIA
 {
 	_DEBUG_ENCODE_MSG_MANI("handleKeyDown %d,%d,%d\n",m_posX,m_posY,m_posZ);
 	osg::Vec3d trans; 
+	int x = m_posX, y = m_posY, z = m_posZ;
 	switch (ea.getKey())
 	{
 	case osgGA::GUIEventAdapter::KEY_A:
 
 		m_posX += m_velocityX;
+
 		trans.set(osg::Vec3d(m_velocityX, 0, m_LOD->getFieldHeight(0, m_posX, m_posY) - m_posZ));
 
 		break;
@@ -156,6 +160,14 @@ bool LODManipulator::handleKeyDown(const osgGA::GUIEventAdapter& ea, osgGA::GUIA
 	default:
 		break;
 	}
+	if (m_posX < 0 || m_posX >= m_LOD->getLODRange()._width || m_posY < 0 || m_posY >= m_LOD->getLODRange()._height)
+	{
+		m_posX = x;
+		m_posY = y;
+		m_posZ = z;
+		return true;
+	}
+
 	osg::Matrixd tl;
 	tl.makeTranslate(trans);
 
@@ -164,7 +176,7 @@ bool LODManipulator::handleKeyDown(const osgGA::GUIEventAdapter& ea, osgGA::GUIA
 	int tileX = (m_LOD->getLODRange()._width-1) / N+1;
 	int tileY = (m_LOD->getLODRange()._width-1) / N+1;
 
-	m_posZ = m_LOD->getFieldHeight(0, m_posX%tileX, m_posY%tileY);
+	m_posZ = m_LOD->getFieldHeight(0, m_posX, m_posY);
 	m_viewMatrix.set(m_viewMatrix*tl);
 	return true;
 
