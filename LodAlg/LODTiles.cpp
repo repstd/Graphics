@@ -68,9 +68,9 @@ void LODTile::init(BYTE* heightMat, const Range globalRange, const Range localRa
 void LODTile::updateCameraInfo(osg::Vec3d& eye)
 {
 	m_ViewX = eye.x();
-	m_ViewY= eye.y();
 	m_ViewZ = eye.z();
 
+	m_ViewY= eye.y();
 }
 
 

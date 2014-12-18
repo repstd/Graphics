@@ -110,8 +110,15 @@ bool LODManipulator::handleMouseMove(const osgGA::GUIEventAdapter& ea, osgGA::GU
 }
 bool LODManipulator::handleMouseDrag(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us)
 {
+
+	
 	osg::Matrixd rot;
-	rot.makeRotate(osg::RadiansToDegrees(5.0), osg::Z_AXIS);
+	osg::Vec3d eye, at, up;
+	m_viewMatrix.getLookAt(eye, at, up);
+	osg::Quat rotate;
+	rotateYawPitch(rotate,ea.getX() ,ea.getY() , up);
+	//rot.makeRotate(osg::RadiansToDegrees(5.0), osg::Z_AXIS);
+	rot.makeRotate(rotate);
 	m_viewMatrix.set(m_viewMatrix*rot);
 	return true;
 
