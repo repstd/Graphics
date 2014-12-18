@@ -10,49 +10,51 @@
 #include <vector>
 #include <assert.h>
 
-class TileThread: public OpenThreads::Thread
+class TileThread : 
+	public OpenThreads::Thread,
+	private LODTile
 {
 public:
 	TileThread():
-		OpenThreads::Thread()
+		OpenThreads::Thread(),
+		LODTile()
 	{
-			m_pTile = new LODTile();
-	
+			
 	}
 public:
 	virtual void run()
 	{
-		m_pTile->BFSRender();
+		m_pTile.BFSRender();
 		return;
 	
 	}
 	void init(BYTE* heightMat, const Range globalRange, const Range localRange)
 	{
-		m_pTile->init(heightMat, globalRange, localRange);
+		m_pTile.init(heightMat, globalRange, localRange);
 	}
 	void updateCameraInfo(osg::Vec3d& eye) const
 	{
 	
-		m_pTile->updateCameraInfo(eye);
+		m_pTile.updateCameraInfo(eye);
 	}
 
 	void updateCameraInfo(osg::Vec3d& eye,osg::GLBeginEndAdapter& gl,osg::State* stat) const
 	{
 	
-		m_pTile->updateCameraInfo(eye,gl,stat);
+		m_pTile.updateCameraInfo(eye,gl,stat);
 	}
 	void BFSRender() const
 	{
-		m_pTile->BFSRender();
+		m_pTile.BFSRender();
 	}
 
 	int getHeight(int x, int y)
 	{
 	
-		return m_pTile->GetAveHeight(x, y);
+		return m_pTile.GetAveHeight(x, y);
 	}
 private:
-	LODTile* m_pTile;
+	mutable LODTile m_pTile;
 	
 
 };
@@ -93,14 +95,12 @@ private:
 
 
 	void drawImplementation(osg::RenderInfo& renderInfo) const;
-
-
 	std::vector<PTileThread> m_vecTile;
 	std::vector<Range> m_vecRange;
 	Range m_rglobalPara;
-
-
 	
+
+
 
 };
 

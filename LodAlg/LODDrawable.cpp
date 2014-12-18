@@ -101,7 +101,7 @@ void LODDrawable::init(const char* filename)
 		}
 	}
 
-
+	
 	
 
 	delete[] tempHeightMap;

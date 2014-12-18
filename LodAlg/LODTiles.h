@@ -178,7 +178,7 @@ public:
 	float GetAveHeight(float x, float y) const;
 
 	void BFSRender() const;
-
+	void BFSRenderPrimitive() const;
 
 private:
 
@@ -229,5 +229,6 @@ private:
 	float         m_fScale;
 	mutable osg::GLBeginEndAdapter m_gl;
 	mutable osg::State* m_stat;
+	GLint	m_vbo, m_ibo, m_vao;
 };
 
