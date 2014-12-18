@@ -73,11 +73,23 @@ void LODTile::updateCameraInfo(osg::Vec3d& eye)
 	m_ViewY= eye.y();
 }
 
+void LODTile::updateCameraInfo(osg::Vec3d&	eye,osg::GLBeginEndAdapter& gl,osg::State* stat)	
+{
+	m_gl = gl;
+	m_stat = stat;
+	m_gl.setState(m_stat);
+	m_ViewX = eye.x();
+
+	m_ViewZ = eye.z();
+
+	m_ViewY= eye.y();
+}
+
 
 
 void LODTile::BFSRender() const
 {
-
+	
 	std::vector<LNODE>  v1;
 	std::vector<LNODE>  v2;
 	std::vector<LNODE>* cur_Queue;
@@ -462,12 +474,14 @@ inline void LODTile::GLVERTEX(int x, int y) const
 	int lx = x;
 	int ly = y;
 	local2Global(lx, ly, z);
-	glVertex3f(lx, ly, z);
+	m_gl.Vertex3f(lx, ly, z);
+	//m_gl.glVertex3f(lx, ly, z);
 
 }
 void LODTile::DrawNode_FILL(int x, int z, int d, int dy) const
 {
-	glBegin(GL_TRIANGLE_FAN);
+	//glBegin(GL_TRIANGLE_FAN);
+	m_gl.Begin(GL_LINE_STRIP);
 	glColor3f(1, 0, 0);
 	GLVERTEX(x, z);
 
@@ -485,7 +499,8 @@ void LODTile::DrawNode_FILL(int x, int z, int d, int dy) const
 	if (m_neighbor[NV_U] == VS_ACTIVE)
 		GLVERTEX(x, z + d);
 	GLVERTEX(x - d, z + d);
-	glEnd();
+	//glEnd();
+	m_gl.End();
 }
 
 
@@ -510,9 +525,11 @@ void LODTile::DrawNode_FRAME(int x, int z, int dx, int dy) const
 	
 
 	glPushAttrib(GL_COLOR);
-	APPLY_COLOR(m_rlocalPara._index_i*m_rlocalPara._N + m_rlocalPara._index_j);
-	//glColor3f(1, 1, 1);
-	glBegin(GL_LINE_STRIP);
+	//APPLY_COLOR(m_rlocalPara._index_i*m_rlocalPara._N + m_rlocalPara._index_j);
+	m_gl.Color4f(1, 1, 1,1);
+	
+	//glBegin(GL_LINE_STRIP);
+	m_gl.Begin(GL_LINE_STRIP);
 	GLVERTEX(x + dx, z - dy);
 	GLVERTEX(x, z);
 	GLVERTEX(x - dx, z + dy);
@@ -528,26 +545,33 @@ void LODTile::DrawNode_FRAME(int x, int z, int dx, int dy) const
 	if (m_neighbor[NV_U] == VS_ACTIVE)
 		GLVERTEX(x, z + dy);
 	GLVERTEX(x - dx, z + dy);
-	glEnd();
-	glBegin(GL_LINE_STRIP);
+	//glEnd();
+	m_gl.End();
+	//glBegin(GL_LINE_STRIP);
+	m_gl.Begin(GL_LINE_STRIP);
 	GLVERTEX(x - dx, z - dy);
 	GLVERTEX(x, z);
 	GLVERTEX(x + dx, z + dy);
-	glEnd();
+	//glEnd();
+	m_gl.End();
+	//glBegin(GL_LINE_STRIP);
 	glBegin(GL_LINE_STRIP);
 	if (m_neighbor[NV_D] == VS_ACTIVE)
 		GLVERTEX(x, z - dy);
 	GLVERTEX(x, z);
 	if (m_neighbor[NV_U] == VS_ACTIVE)
 		GLVERTEX(x, z + dy);
-	glEnd();
-	glBegin(GL_LINE_STRIP);
+	//glEnd();
+	m_gl.End();
+	//glBegin(GL_LINE_STRIP);
+	m_gl.Begin(GL_LINE_STRIP);
 	if (m_neighbor[NV_L] == VS_ACTIVE)
 		GLVERTEX(x - dx, z);
 	GLVERTEX(x, z);
 	if (m_neighbor[NV_R] == VS_ACTIVE)
 		GLVERTEX(x + dx, z);
-	glEnd();
+	//glEnd();
+	m_gl.End();
 	glPushAttrib(GL_COLOR);
 }
 

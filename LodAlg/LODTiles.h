@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "Matrix.h"
 #include <osg/Matrix>
+#include <osg/GLBeginEndAdapter>
 #include <OpenThreads\Thread>
 #include <assert.h>
 
@@ -171,6 +172,7 @@ public:
 
 	void init(BYTE* heightMat, const Range globalRange,const Range localRange);
 	void updateCameraInfo(osg::Vec3d& eye);
+	void updateCameraInfo(osg::Vec3d&	eye, osg::GLBeginEndAdapter& gl,osg::State* stat);
 
 	int   GetHeight(int x, int y) const;
 	float GetAveHeight(float x, float y) const;
@@ -225,5 +227,7 @@ private:
 	PatchSize   m_delta[30];
 	mutable int   m_neighbor[4];
 	float         m_fScale;
+	mutable osg::GLBeginEndAdapter m_gl;
+	mutable osg::State* m_stat;
 };
 

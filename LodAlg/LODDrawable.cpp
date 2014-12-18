@@ -71,7 +71,7 @@ void LODDrawable::init(const char* filename)
 
 
 	Range tileRange[16];
-	TileThread pTile[16]; 
+	PTileThread pTile[16]; 
 	int index = 0; 
 	int N = 2;
 	int tileSize = (m_rglobalPara._width - 1) / N +1;
@@ -82,7 +82,7 @@ void LODDrawable::init(const char* filename)
 		{
 
 			index = j * N + i;
-			//pTile[index] = new TileThread;
+			pTile[index] = new TileThread;
 
 			tileRange[index]._width = tileRange[index]._height = tileSize;
 
@@ -93,7 +93,7 @@ void LODDrawable::init(const char* filename)
 			tileRange[index]._index_i = i;
 			tileRange[index]._index_j= j;
 			tileRange[index]._N = N;
-			pTile[index].init(tempHeightMap, m_rglobalPara, tileRange[index]);
+			pTile[index]->init(tempHeightMap, m_rglobalPara, tileRange[index]);
 
 			m_vecTile.push_back(pTile[index]);
 
@@ -114,6 +114,8 @@ void LODDrawable::init(const char* filename)
 
 void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 {
+	osg::GLBeginEndAdapter& gl = renderInfo.getState()->getGLBeginEndAdapter();
+
 	osg::ref_ptr<osg::Camera> camera = renderInfo.getCurrentCamera();
 
 	osg::Vec3d eye, at, up;
@@ -129,9 +131,9 @@ void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 	int sz = m_vecTile.size();
 	for (int i = 0; i < sz; i++)
 	{
-		//m_vecTile[i].start();
-		m_vecTile[i].updateCameraInfo(eye);
-		m_vecTile[i].BFSRender();
+		m_vecTile[i]->updateCameraInfo(eye,gl,renderInfo.getState());
+		m_vecTile[i]->BFSRender();
+	//	m_vecTile[i]->start();
 	}
 }
 

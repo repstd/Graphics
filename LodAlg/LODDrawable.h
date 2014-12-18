@@ -3,15 +3,18 @@
 #include "Matrix.h"
 #include "LODTiles.h"
 #include <osg/Drawable>
+#include <osg/GLBeginEndAdapter>
 #include <osg/RenderInfo>
+#include <OpenThreads/Thread>
 #include "LODTiles.h"
 #include <vector>
 #include <assert.h>
 
-class TileThread
+class TileThread: public OpenThreads::Thread
 {
 public:
-	TileThread()
+	TileThread():
+		OpenThreads::Thread()
 	{
 			m_pTile = new LODTile();
 	
@@ -31,6 +34,12 @@ public:
 	{
 	
 		m_pTile->updateCameraInfo(eye);
+	}
+
+	void updateCameraInfo(osg::Vec3d& eye,osg::GLBeginEndAdapter& gl,osg::State* stat) const
+	{
+	
+		m_pTile->updateCameraInfo(eye,gl,stat);
 	}
 	void BFSRender() const
 	{
@@ -73,7 +82,7 @@ public:
 			y = 0;
 		x %= m_vecRange[index]._width;
 		y %= m_vecRange[index]._height;
-		return m_vecTile[index].getHeight(x, y);
+		return m_vecTile[index]->getHeight(x, y);
 	}
 	Range getLODRange()
 	{
@@ -86,7 +95,7 @@ private:
 	void drawImplementation(osg::RenderInfo& renderInfo) const;
 
 
-	std::vector<TileThread> m_vecTile;
+	std::vector<PTileThread> m_vecTile;
 	std::vector<Range> m_vecRange;
 	Range m_rglobalPara;
 
