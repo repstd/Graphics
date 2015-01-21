@@ -2,11 +2,10 @@
 //
 
 #include "stdafx.h"
-#include "LODDrawable.h"
-#include "LODTiles.h"
+#include "ldrawable.h"
+#include "ltiles.h"
 #include <osgViewer/Viewer>
 #include <osgViewer/View>
-
 #include <osgViewer/ViewerEventHandlers>
 #include <osgGA/CameraManipulator>
 #include <osgGA/DriveManipulator>
@@ -14,40 +13,12 @@
 #include <osgGA/TerrainManipulator>
 #include <osgGA/StandardManipulator>
 #include <osgGA/GUIEventHandler>
-#include "LODManipulator.h"
+#include "lmanipulator.h"
 #include <osg/Node>
 #include <osg/BlendFunc>
 #include <OpenThreads\Thread>
 #define _HEIGHT_FIELD_FILE_RAW "./data/terrain.raw"
 #define _HEIGHT_FIELD_FILE_SRTM "./data/srtm_ramp2_world_5400x2700_2.jpg"
-class thread:
-	public OpenThreads::Thread,LODTile
-{
-public:
-	thread() :OpenThreads::Thread(), LODTile()
-	{
-
-	}
-	virtual void run()
-	{
-		this->BFSRender();
-		
-	}
-private:
-	int x;
-	mutable int y;
-	int f() const
-	{
-		return 0;
-	}
-
-};
-
-void test()
-{
-
-
-}
 class camDrawcallback :public osg::Drawable::DrawCallback
 {
 
@@ -80,6 +51,26 @@ public:
 	}
 
 };
+class errorHandler : public osg::NotifyHandler
+{
+public:
+	errorHandler()
+	{
+
+	}
+	errorHandler(const std::string& filename)
+	{
+	}
+	void notify(osg::NotifySeverity severity, const char* message)
+	{
+
+	}
+protected:
+	~errorHandler(void) {
+
+	}
+};
+
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -95,9 +86,6 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	osg::Matrixd cameraRotation;
 	cameraRotation.makeRotate(osg::DegreesToRadians(180.0), osg::Z_AXIS);
-
-
-
 	
 	viewer.getCamera()->getGraphicsContext()->makeCurrent();
 	
@@ -105,7 +93,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	
 	LODDrawable* lod = new LODDrawable();
-	lod->init(_HEIGHT_FIELD_FILE_RAW);
+	lod->initRaw(_HEIGHT_FIELD_FILE_RAW);
 	lod->setName("LOD");
 
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
@@ -118,22 +106,21 @@ int _tmain(int argc, _TCHAR* argv[])
 	//osgGA::FirstPersonManipulator* manipulator = new osgGA::FirstPersonManipulator();
 
 
-	LODManipulator* manipulator = new LODManipulator(lod);
+	Manipulator* manipulator = new Manipulator(lod);
 
 	osg::Matrixd vm;
 	int initZ = lod->getFieldHeight(0, lod->getLODRange()._centerX, lod->getLODRange()._centerY)-100;
 	vm.makeLookAt(osg::Vec3d(0, 3, initZ), osg::Vec3d(0, 2, initZ), osg::Vec3d(0, 0, 1));
 	manipulator->setByMatrix(vm);
+
 	//manipulator->setUserData(lod);
 	viewer.setCameraManipulator(manipulator);
-	//viewer.setCameraManipulator(new osgGA::TerrainManipulator());
-
 	viewer.setSceneData(geode);
 	viewer.setRunMaxFrameRate(90);
 	viewer.addEventHandler(new  osgViewer::StatsHandler);
 	viewer.addEventHandler(new  osgViewer::WindowSizeHandler);
 	viewer.addEventHandler(new  osgViewer::HelpHandler);
-
+	osg::setNotifyHandler(new errorHandler);
 	return viewer.run();
 }
 

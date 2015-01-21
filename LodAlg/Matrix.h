@@ -22,7 +22,6 @@ public:
 	}
 	void SetData(T *pData,int srcOffsetX,int srcOffsetY,int srcWidth,int SrcHeight,int dstWidth,int dstHeight)
 	{
-
 		for (int y = 0; y < dstHeight; y++)
 		{
 			memcpy(data + y*dstWidth, pData + ((srcOffsetY + dstHeight - 1 - y)*srcWidth + srcOffsetX)*sizeof(T), dstWidth*sizeof(T));

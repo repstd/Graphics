@@ -1,10 +1,8 @@
 // stdafx.h : include file for standard system include files,
 // or project specific include files that are used frequently, but
 // are changed infrequently
-//
 
 #pragma once
-
 #include "targetver.h"
 
 #include <windows.h>
@@ -15,8 +13,9 @@
 
 // TODO: reference additional headers your program requires here
 /** 包含gl头文件 */
-#include <gl\gl.h>				 
-#include <gl\glu.h>
+#include <GL/glew.h>
+#include <gl/gl.h>				 
+#include <gl/glu.h>
 #include <tchar.h>
 
 
@@ -24,9 +23,7 @@
 #define _DEBUG_ENCODE_MSG(filename,format,data) \
 {\
 	FILE* fp = fopen(filename, "a+"); \
-	char buf[MAX_PATH]; \
-	sprintf(buf, format, data); \
-	fwrite(buf, strlen(buf), 1, fp); \
+	fprintf(fp, format, data);\
 	fclose(fp); \
 }
 
