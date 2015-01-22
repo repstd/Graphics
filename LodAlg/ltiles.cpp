@@ -57,7 +57,7 @@ void VAO::initVertex(const float* vertexs)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void VAO::initVertex(const BYTE* heightMap, int offset_col/*offset in x brought by tile generation.*/, int offset_row, Range rlocal, Range rglobal, int offset_x, int offset_y, int offset_z )
+void VAO::initVertex(const BYTE* heightMap, int offset_col, int offset_row, Range rlocal, Range rglobal, int offset_x, int offset_y, int offset_z ,bool isFlip)
 {
 
 	BYTE* pHeight = const_cast<BYTE*>(heightMap);
@@ -66,11 +66,21 @@ void VAO::initVertex(const BYTE* heightMap, int offset_col/*offset in x brought 
 		for (int col = 0; col < rlocal._width; col++)
 		{
 			BYTE* p;
-
-			if (rlocal == rglobal)
-				p = pHeight + (rlocal._height - 1 - row)*rglobal._width + col;
+			if (isFlip)
+			{
+				if (rlocal == rglobal)
+					p = pHeight + (rlocal._height - 1 - row)*rglobal._width + col;
+				else
+					p = pHeight + (offset_row + rlocal._height - 1 - row)*rglobal._width + col + offset_col;
+			}
 			else
-				p = pHeight + (offset_row + rlocal._height - 1 - row)*rglobal._width + col + offset_col;
+			{
+				if (rlocal == rglobal)
+					p = pHeight + row*rglobal._width + col;
+				else
+					p = pHeight + (offset_row + row)*rglobal._width + col + offset_col;
+			}
+
 			if (p == NULL)
 				continue;
 			m_vecVertex.push_back(col + offset_col + offset_x);
@@ -84,16 +94,19 @@ void VAO::initVertex(const BYTE* heightMap, int offset_col/*offset in x brought 
 	glBufferData(GL_ARRAY_BUFFER, m_vecVertex.size()*sizeof(GLfloat), &m_vecVertex[0], GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-
-
 }
-void VAO::initVertex(const BYTE* heightMap, int row_offset, int col_offset, int w, int h, int offset_x, int offset_y, int offset_z)
+void VAO::initVertex(const BYTE* heightMap, int row_offset, int col_offset, int w, int h, int offset_x, int offset_y, int offset_z,bool isFlip)
 {
 	BYTE* pHeight = const_cast<BYTE*>(heightMap);
 	for (int row = row_offset; row < row_offset + h; row++)
 	for (int col = col_offset; col < col_offset + w; col++)
 	{
-		BYTE* p = pHeight + (2 * row_offset + h - 1 - row)*w + col;
+		BYTE* p;
+		if (isFlip)
+			p = pHeight + (2 * row_offset + h - 1 - row)*w + col;
+		else
+			p = pHeight + (2 * row_offset + row)*w + col;
+
 		if (p == NULL)
 			continue;
 		m_vecVertex.push_back(col + offset_x);
@@ -187,6 +200,7 @@ void LODTile::init(BYTE* heightMat, const Range globalRange, const Range localRa
 	m_HMMatrix.Reset(m_rlocalPara._width, m_rlocalPara._height);
 
 	m_HMMatrix.SetData(heightMat, offsetCol, offsetRow, globalRange._width, globalRange._height, localRange._width, localRange._height);
+
 	m_vertexBuf.initVertex(heightMat,
 		offsetCol,
 		offsetRow,
@@ -195,35 +209,35 @@ void LODTile::init(BYTE* heightMat, const Range globalRange, const Range localRa
 		m_rlocalPara._centerX - m_rlocalPara._width / 2 - m_rglobalPara._width / 2,
 		m_rlocalPara._centerY - m_rlocalPara._height / 2 - m_rglobalPara._height / 2,
 		-100);
+
 	initParams();
 
 }
 
 void LODTile::init(heightField* input, int i, int j, int N)
 {
-	Range local;
-	Range global;
-	BYTE* temp = new unsigned char[1025 * 1025];
-	input->generateTile(i, j, N, temp, local,global);
+	BYTE* temp = new unsigned char[input->getTileWidth(i,j,N)* input->getTileHeight(i,j,N)];
 
-	m_rlocalPara = local;
-	m_rglobalPara = global;
+	input->generateTile(i, j, N, temp, m_rlocalPara,m_rglobalPara);
 
-	int offsetCol = local._index_i*local._width;
-	int offsetRow = (local._N - 1 - local._index_j)*local._height;
+	int offsetCol = m_rlocalPara._index_i*m_rlocalPara._width;
+	int offsetRow = (m_rlocalPara._N - 1 - m_rlocalPara._index_j)*m_rlocalPara._height;
 
-	m_HMMatrix.Reset(local._width, local._height);
-	m_HMMatrix.SetData(temp, 0, 0, local._width, local._height, local._width, local._height);
+	m_HMMatrix.Reset(m_rlocalPara._width, m_rlocalPara._height);
+	m_HMMatrix.SetData(temp, 0, 0, m_rlocalPara._width, m_rlocalPara._height, m_rlocalPara._width, m_rlocalPara._height,false);
 	m_vertexBuf.initVertex(temp, 
 		offsetCol, 
 		offsetRow, 
-		local, 
-		local,
-		local._centerX - local._width / 2 - global._width / 2,
-		local._centerY - local._height / 2 - global._height / 2,
-		-100);
-	initParams();
+		m_rlocalPara, 
+		m_rlocalPara,
+		m_rlocalPara._centerX - m_rlocalPara._width / 2 - m_rglobalPara._width / 2,
+		m_rlocalPara._centerY - m_rlocalPara._height / 2 - m_rglobalPara._height / 2,
+		-100,false);
+
 	delete[] temp;
+
+	initParams();
+
 }
 void LODTile::updateCameraInfo(osg::Vec3d& eye)
 {

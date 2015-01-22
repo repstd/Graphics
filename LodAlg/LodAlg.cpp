@@ -98,7 +98,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	LODDrawable* lod = new LODDrawable();
 
 	lod->init(input.release());
-
+	//lod->init(_HEIGHT_FIELD_FILE_RAW);
 	lod->setName("LOD");
 
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;

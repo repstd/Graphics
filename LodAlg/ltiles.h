@@ -185,8 +185,8 @@ public:
 	~VAO();
 public:
 	void initVertex(const float* vertexs);
-	void initVertex(const BYTE* heightMap, int offset_col/*offset in x brought by tile generation.*/, int offset_row, Range rlocal, Range rglobal, int offset_x, int offset_y, int offset_z = -100);
-	void initVertex(const BYTE* heightMap, int row_offset, int col_offset, int w, int h, int offset_x, int offset_y, int offset_z);
+	void initVertex(const BYTE* heightMap, int offset_col, int offset_row, Range rlocal, Range rglobal, int offset_x, int offset_y, int offset_z = -100,bool isFlip=true);
+	void initVertex(const BYTE* heightMap, int row_offset, int col_offset, int w, int h, int offset_x, int offset_y, int offset_z,bool isFlip=true);
 	void updateIndex(const UINT* indx, int size);
 	void draw(int startIndex, int num);
 private:
@@ -240,14 +240,11 @@ private:
 	//void DrawNode_TEXTURE(int x, int y, int d);
 	void DrawNode_FRAME(int x, int y, int dx, int dy) const;
 private:
-
 	CMatrix<BYTE> m_HMMatrix;
 	CMatrix<BYTE>    m_LodMatrix;
 	CMatrix<float> m_DHMatrix;
-
 	float m_fc;
 	float m_fC;
-
 	Range m_rlocalPara;
 	Range m_rglobalPara;
 	mutable float m_ViewX, m_ViewY, m_ViewZ;

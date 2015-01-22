@@ -20,12 +20,14 @@ public:
 	{	
 		memcpy(data, pData, _width*_height*sizeof(T));
 	}
-	void SetData(T *pData,int srcOffsetX,int srcOffsetY,int srcWidth,int SrcHeight,int dstWidth,int dstHeight)
+	void SetData(T *pData,int srcOffsetX,int srcOffsetY,int srcWidth,int SrcHeight,int dstWidth,int dstHeight,bool isFlip=true)
 	{
 		for (int y = 0; y < dstHeight; y++)
 		{
-			std::cout << y << std::endl;
-			memcpy(data + y*dstWidth, pData + ((srcOffsetY + dstHeight - 1 - y)*srcWidth + srcOffsetX)*sizeof(T), dstWidth*sizeof(T));
+			if (isFlip)
+				memcpy(data + y*dstWidth, pData + ((srcOffsetY + dstHeight - 1 - y)*srcWidth + srcOffsetX)*sizeof(T), dstWidth*sizeof(T));
+			else
+				memcpy(data + y*dstWidth, pData + ((srcOffsetY+y)*srcWidth + srcOffsetX)*sizeof(T), dstWidth*sizeof(T));
 		}
 	}
 	void Reset(int w, int h) const

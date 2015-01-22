@@ -33,15 +33,12 @@ void rawData::getTile(BYTE* src, BYTE* dst, int row, int col, int N)
 	int channel = ext._channel;
 	int srcWidth = ext._width;
 	int tileWidth = (srcWidth - 1) / N + 1;
-
+	int tileHeight = tileWidth;
 	int tileWidthEven = srcWidth / N;
-
-	int tileHeight = tileWidthEven;
-
-	for (int r = row*tileHeight; r < row*tileHeight + tileHeight; r++)
-	{
-		memcpy(dst + (r - row*tileHeight)*tileWidthEven*channel, src + r*srcWidth*channel, tileWidth*channel*sizeof(BYTE));
-	}
+	int srcOffsetX = row*tileWidth;
+	int srcOffsetY = (N - 1 - col)*tileHeight;
+	for (int y = 0; y < tileHeight; y++)
+		memcpy(dst + y*tileWidth, src + ((srcOffsetY + tileHeight - 1 - y)*srcWidth + srcOffsetX), tileWidth);
 }
 extent rawData::getExtent()
 {
@@ -254,7 +251,6 @@ dataImp* dataImpFactory::createRawImp(const char* filename)
 }
 dataImp* dataImpFactory::createGDALImp(const char* filename, const char* driverName)
 {
-
 	assert(driverName != NULL);
 	GDALAllRegister();
 	std::unique_ptr<gdalDataProxy> gdal(new gdalDataProxy);
@@ -299,12 +295,12 @@ int heightField::getChannel()
 int heightField::getCenterX()
 {
 	int width = getWidth();
-	return width >> 1;
+	return width / 2;
 }
 int heightField::getCenterY()
 {
 	int height = getHeight();
-	return height >> 1;
+	return height / 2;
 }
 
 int heightField::getTileWidth(int i, int j, int N)
@@ -324,21 +320,21 @@ int heightField::getTileCenterX(int i, int j, int N)
 {
 	int tileWidth = getTileWidth(i, j, N);
 	int tileWidthEven = tileWidth - 1;
-	return i*tileWidthEven + tileWidth / 2;
+	return j*tileWidth + tileWidthEven / 2;
 
 }
 int heightField::getTileCenterY(int i, int j, int N)
 {
 	int tileHeight = getTileHeight(i, j, N);
 	int tileHeightEven = tileHeight - 1;
-	return j*tileHeightEven + tileHeight / 2;
+	return i*tileHeight + tileHeightEven / 2;
 }
 void heightField::generateTile(int i, int j, int N, BYTE* dst, Range& tileRange)
 {
 
 	dataImp* imp = getImp();
-	tileRange._centerX = getTileCenterX(i, j, N);
-	tileRange._centerY = getTileCenterY(i, j, N);
+	tileRange._centerX = getTileCenterY(i, j, N);
+	tileRange._centerY = getTileCenterX(i, j, N);
 	tileRange._width = getTileWidth(i, j, N);
 	tileRange._height = getTileHeight(i, j, N);
 	tileRange._index_i = i;
