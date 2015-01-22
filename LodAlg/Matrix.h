@@ -24,6 +24,7 @@ public:
 	{
 		for (int y = 0; y < dstHeight; y++)
 		{
+			std::cout << y << std::endl;
 			memcpy(data + y*dstWidth, pData + ((srcOffsetY + dstHeight - 1 - y)*srcWidth + srcOffsetX)*sizeof(T), dstWidth*sizeof(T));
 		}
 	}

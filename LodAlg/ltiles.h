@@ -5,7 +5,7 @@
 #include <osg/GLBeginEndAdapter>
 #include <OpenThreads\Thread>
 #include <assert.h>
-
+class heightField;
 enum STATUS
 {
 	VS_DISABLE = 0x00,
@@ -161,6 +161,19 @@ typedef struct _Range
 	int _centerX, _centerY;
 	int _index_i, _index_j;
 	int _N;
+	bool operator==(const _Range& other)
+	{
+		if (_width != other._width)
+			return false;
+		if (_height != other._height)
+			return false;
+		if (_centerX != other._centerX)
+			return false;
+		if (_centerY != other._centerY)
+			return false;
+
+		return true;
+	}
 } Range;
 
 
@@ -188,18 +201,16 @@ class LODTile
 public:
 	LODTile();
 
-
 	void init(BYTE* heightMat, const Range globalRange, const Range localRange);
+	void init(heightField* input, int i, int j, int N);
 	void updateCameraInfo(osg::Vec3d& eye);
 	void updateCameraInfo(osg::Vec3d&	eye, osg::GLBeginEndAdapter& gl, osg::State* stat);
-
 	int   GetHeight(int x, int y) const;
 	float GetAveHeight(float x, float y) const;
-
 	void BFSRender() const;
-
 	void BFSRenderPrimitive() const;
 	void DrawIndexedPrimitive() const;
+	Range getLocalRange();
 private:
 
 
@@ -228,9 +239,6 @@ private:
 	void DrawNode_FILL(int x, int y, int dx, int dy) const;
 	//void DrawNode_TEXTURE(int x, int y, int d);
 	void DrawNode_FRAME(int x, int y, int dx, int dy) const;
-
-
-
 private:
 
 	CMatrix<BYTE> m_HMMatrix;
@@ -242,8 +250,6 @@ private:
 
 	Range m_rlocalPara;
 	Range m_rglobalPara;
-
-
 	mutable float m_ViewX, m_ViewY, m_ViewZ;
 	PatchSize   m_delta[30];
 	mutable int   m_neighbor[4];

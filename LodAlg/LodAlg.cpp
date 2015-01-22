@@ -91,7 +91,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	viewer.setDataVariance(osg::Object::DYNAMIC);
 	
 	std::unique_ptr<dataImp> rawdata(dataImpFactory::instance()->createRawImp(_HEIGHT_FIELD_FILE_RAW));
-	std::unique_ptr<dataImp> gdaldata(dataImpFactory::instance()->createGDALImp(_HEIGHT_FIELD_FILE_PUGET_ASC, "ASC"));
+	//std::unique_ptr<dataImp> gdaldata(dataImpFactory::instance()->createGDALImp(_HEIGHT_FIELD_FILE_PUGET_ASC, "ASC"));
 
 	std::unique_ptr<heightField> input(new heightField(rawdata.release()));
 

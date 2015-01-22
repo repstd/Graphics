@@ -3,7 +3,7 @@
 #include <osg\GraphicsContext>
 #include "Matrix.h"
 #include "ltiles.h"
-
+#include "linput.h"
 #ifndef TileThread
 #define TileThread TileThreadW
 #else
@@ -11,52 +11,23 @@
 
 #endif
 
-class TileThreadP :
-	public OpenThreads::Thread
+class TileThreadP : public OpenThreads::Thread
 {
 public:
-	TileThreadP() :
-		OpenThreads::Thread()
-	{
+	TileThreadP();
 
-		}
 public:
-	virtual void run() const
-	{
-		m_pTile.BFSRender();
-		return;
-
-	}
-	void init(BYTE* heightMat, const Range globalRange, const Range localRange)
-	{
-		m_pTile.init(heightMat, globalRange, localRange);
-	}
-	void updateCameraInfo(osg::Vec3d& eye) const
-	{
-
-		m_pTile.updateCameraInfo(eye);
-	}
-
-	void updateCameraInfo(osg::Vec3d& eye, osg::GLBeginEndAdapter& gl, osg::State* stat) const
-	{
-
-		m_pTile.updateCameraInfo(eye, gl, stat);
-	}
-	void BFSRender() const
-	{
-		m_pTile.BFSRender();
-	}
-
-	int getHeight(int x, int y)
-	{
-
-		return m_pTile.GetAveHeight(x, y);
-	}
+	virtual void run() const;
+	void init(BYTE* heightMat, const Range globalRange, const Range localRange);
+	void init(heightField* input, int i, int j, int N);
+	void updateCameraInfo(osg::Vec3d& eye) const;
+	void updateCameraInfo(osg::Vec3d& eye, osg::GLBeginEndAdapter& gl, osg::State* stat) const;
+	void BFSRender() const;
+	int getHeight(int x, int y);
+	Range getLocalRange();
 private:
 	mutable LODTile m_pTile;
-
 };
-
 
 class TileThreadW
 {
@@ -75,22 +46,17 @@ public:
 public:
 	virtual void run();
 	void init(BYTE* heightMat, const Range globalRange, const Range localRange);
+	void init(heightField* input, int i, int j, int N);
 	void updateCameraInfo(osg::Vec3d& eye) const;
-
 	void updateCameraInfo(osg::Vec3d& eye, osg::GLBeginEndAdapter& gl, osg::State* stat) const;
 	static void EventLoop(void * para);
 
 	int getStatus();
 	const bool isRunning();
 	void BFSRender() const;
-	void DrawIndexedPrimitive() const
-	{
-
-		m_pTile.DrawIndexedPrimitive();
-
-	}
-
+	void DrawIndexedPrimitive() const { m_pTile.DrawIndexedPrimitive(); }
 	int getHeight(int x, int y);
+	Range getLocalRange();
 private:
 	mutable LODTile m_pTile;
 	mutable HANDLE m_hThread;

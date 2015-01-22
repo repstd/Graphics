@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "linput.h"
 #include <iostream>
+#include "ltiles.h"
 rawData::rawData() :dataImp()
 {
 }
@@ -336,8 +337,6 @@ void heightField::generateTile(int i, int j, int N, BYTE* dst, Range& tileRange)
 {
 
 	dataImp* imp = getImp();
-
-	imp->getTile(dst, i, j, N);
 	tileRange._centerX = getTileCenterX(i, j, N);
 	tileRange._centerY = getTileCenterY(i, j, N);
 	tileRange._width = getTileWidth(i, j, N);
@@ -346,4 +345,21 @@ void heightField::generateTile(int i, int j, int N, BYTE* dst, Range& tileRange)
 	tileRange._index_j = j;
 	tileRange._N = N;
 
+	if (dst == NULL)
+		dst = new unsigned char[tileRange._width*tileRange._height];
+
+	imp->getTile(dst, i, j, N);
+
+}
+
+void heightField::generateTile(int i, int j, int N, BYTE* dst, Range& tileRange, Range& globalRange)
+{
+	generateTile(i, j, N, dst, tileRange);
+	globalRange._centerX = getCenterX();
+	globalRange._centerY = getCenterY();
+	globalRange._width = getWidth();
+	globalRange._height = getHeight();
+	globalRange._index_i = 0;
+	globalRange._index_j = 0;
+	globalRange._N = N;
 }

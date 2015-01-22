@@ -48,30 +48,21 @@ void LODDrawable::init(heightField* input)
 	m_rglobalPara._height = input->getHeight();
 	m_rglobalPara._centerX = input->getCenterX();
 	m_rglobalPara._centerY = input->getCenterY();
-	BYTE* tempHeightMap = new BYTE[m_rglobalPara._width*m_rglobalPara._height];
-	input->generateTile(0, 0, 1, tempHeightMap, m_rglobalPara);
 
 	int index;
-	int N = 4;
+	int N = 1;
 	for (int j = 0; j < N; j++)
 	{
 		for (int i = 0; i < N; i++)
 		{
 			index = j * N + i;
 			PTileThread	pTile = new TileThread();
-			Range tileRange;
-			tileRange._width = tileRange._height = input->getTileWidth(i, j, N);
-			tileRange._centerX = input->getTileCenterX(i, j, N);
-			tileRange._centerY = input->getTileCenterY(i, j, N);
-			tileRange._index_i = i;
-			tileRange._index_j = j;
-			tileRange._N = N;
-			pTile->init(tempHeightMap, m_rglobalPara, tileRange);
+			pTile->init(input, i, N-1-j, N);
 			m_vecTile.push_back(std::auto_ptr<TileThread>(pTile));
-			m_vecRange.push_back(tileRange);
+			m_vecRange.push_back(pTile->getLocalRange());
 		}
 	}
-	delete[] tempHeightMap;
+	//delete[] tempHeightMap;
 }
 
 

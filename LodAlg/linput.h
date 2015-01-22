@@ -1,10 +1,12 @@
 #pragma once
-#include "ltiles.h"
 #include <gdal.h>
 #include <gdal_alg.h>
 #include <gdal_priv.h>
 #include <osgDB/Registry>
 #include <osgDB/WriteFile>
+
+typedef struct _Range Range;
+
 typedef struct _extent
 {
 	int _width;
@@ -129,6 +131,7 @@ public:
 
 	int getTileCenterY(int i, int j, int N);
 	void generateTile(int i, int j, int N, BYTE* dst, Range& tileRange);
+	void generateTile(int i, int j, int N, BYTE* dst, Range& tileRange,Range& globalRange);
 private:
 	std::unique_ptr<dataImp> m_dataInputImp;
 };

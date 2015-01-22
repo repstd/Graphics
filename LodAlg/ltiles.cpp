@@ -10,6 +10,7 @@
 #include <gdal_priv.h>
 #include <osgDB/Registry>
 #include <osgDB/WriteFile>
+#include "linput.h"
 #define MAX_DIS 700.0
 
 #define _DEBUG_FILENAME_ "./pos.txt"
@@ -64,10 +65,14 @@ void VAO::initVertex(const BYTE* heightMap, int offset_col/*offset in x brought 
 	{
 		for (int col = 0; col < rlocal._width; col++)
 		{
-			BYTE* p = pHeight + (offset_row + rlocal._height - 1 - row)*rglobal._width + col + offset_col;
+			BYTE* p;
+
+			if (rlocal == rglobal)
+				p = pHeight + (rlocal._height - 1 - row)*rglobal._width + col;
+			else
+				p = pHeight + (offset_row + rlocal._height - 1 - row)*rglobal._width + col + offset_col;
 			if (p == NULL)
 				continue;
-
 			m_vecVertex.push_back(col + offset_col + offset_x);
 			m_vecVertex.push_back(row + offset_row + offset_y);
 			m_vecVertex.push_back(*(p)+offset_z);
@@ -192,7 +197,33 @@ void LODTile::init(BYTE* heightMat, const Range globalRange, const Range localRa
 		-100);
 	initParams();
 
+}
 
+void LODTile::init(heightField* input, int i, int j, int N)
+{
+	Range local;
+	Range global;
+	BYTE* temp = new unsigned char[1025 * 1025];
+	input->generateTile(i, j, N, temp, local,global);
+
+	m_rlocalPara = local;
+	m_rglobalPara = global;
+
+	int offsetCol = local._index_i*local._width;
+	int offsetRow = (local._N - 1 - local._index_j)*local._height;
+
+	m_HMMatrix.Reset(local._width, local._height);
+	m_HMMatrix.SetData(temp, 0, 0, local._width, local._height, local._width, local._height);
+	m_vertexBuf.initVertex(temp, 
+		offsetCol, 
+		offsetRow, 
+		local, 
+		local,
+		local._centerX - local._width / 2 - global._width / 2,
+		local._centerY - local._height / 2 - global._height / 2,
+		-100);
+	initParams();
+	delete[] temp;
 }
 void LODTile::updateCameraInfo(osg::Vec3d& eye)
 {
@@ -837,4 +868,8 @@ void LODTile::DrawPrim_FILL(int x, int z) const
 void LODTile::DrawPrim_FRAME(int x, int z) const
 {
 	DrawNode_FRAME(x, z, 1, 1);
+}
+Range LODTile::getLocalRange()
+{
+	return m_rlocalPara;
 }
