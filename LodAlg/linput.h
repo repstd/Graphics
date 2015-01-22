@@ -47,7 +47,7 @@ public:
 	virtual void getTile(BYTE* dst, int row, int col, int N);
 	extent getExtent();
 	const char* getFilename();
-	dataImp* getInputData();
+	rawData* getInputData();
 protected:
 	rawDataProxy();
 private:
@@ -64,6 +64,8 @@ public:
 	//Generate a tile of index(i,j) from a  N by N grid.
 	virtual void getTile(BYTE* src, BYTE* dst, int row, int col, int N);
 	virtual extent getExtent();
+	void clip();
+	void setSize(int width,int height);
 private:
 	LONG m_iSize;
 	int m_iRasterWidth, m_iRasterHeight;
@@ -82,7 +84,9 @@ public:
 	extent getExtent();
 	const char* getFilename();
 	const char* getDrivername();
-	dataImp* getInputData();
+	gdalData* getInputData();
+	void clip();
+	void setSize(int width,int height);
 protected:
 	gdalDataProxy();
 private:

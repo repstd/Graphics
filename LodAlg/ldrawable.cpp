@@ -13,7 +13,6 @@
 #include <osgDB/Registry>
 #include <osgDB/WriteFile>
 #include "lmanipulator.h"
-#include "linput.h"
 #define MAX_DIS 700.0
 void saveBMP(int width, int height, int channel, BYTE* data, char* filename, int pixelFormat = GL_BGR)
 {
@@ -43,19 +42,17 @@ LODDrawable::~LODDrawable()
 {
 }
 
-
-void LODDrawable::initRaw(const char* heightFiledMap)
+void LODDrawable::init(heightField* input)
 {
-	std::unique_ptr<dataImp> rawImp(dataImpFactory::instance()->create(dataImpFactory::_RAW, heightFiledMap));
-	std::unique_ptr<heightField> input(new heightField(rawImp.release()));
 	m_rglobalPara._width = input->getWidth();
 	m_rglobalPara._height = input->getHeight();
 	m_rglobalPara._centerX = input->getCenterX();
 	m_rglobalPara._centerY = input->getCenterY();
-	BYTE* tempHeightMap = new BYTE[m_rglobalPara._width*m_rglobalPara._height]; 
+	BYTE* tempHeightMap = new BYTE[m_rglobalPara._width*m_rglobalPara._height];
 	input->generateTile(0, 0, 1, tempHeightMap, m_rglobalPara);
+
 	int index;
-	int N =1;
+	int N = 4;
 	for (int j = 0; j < N; j++)
 	{
 		for (int i = 0; i < N; i++)
@@ -67,7 +64,7 @@ void LODDrawable::initRaw(const char* heightFiledMap)
 			tileRange._centerX = input->getTileCenterX(i, j, N);
 			tileRange._centerY = input->getTileCenterY(i, j, N);
 			tileRange._index_i = i;
-			tileRange._index_j= j;
+			tileRange._index_j = j;
 			tileRange._N = N;
 			pTile->init(tempHeightMap, m_rglobalPara, tileRange);
 			m_vecTile.push_back(std::auto_ptr<TileThread>(pTile));
@@ -75,9 +72,9 @@ void LODDrawable::initRaw(const char* heightFiledMap)
 		}
 	}
 	delete[] tempHeightMap;
-	input.release();
-
 }
+
+
 void LODDrawable::init(const char* filename)
 {
 
@@ -99,16 +96,16 @@ void LODDrawable::init(const char* filename)
 	//TODO: fix me. We should handle the case that the terrain differs in height and width.@yulw
 	m_rglobalPara._height = m_rglobalPara._width;
 
-	m_rglobalPara._centerX =floor(float (m_rglobalPara._width) /2);
-	m_rglobalPara._centerY =floor (float(m_rglobalPara._height )/2);
+	m_rglobalPara._centerX = floor(float(m_rglobalPara._width) / 2);
+	m_rglobalPara._centerY = floor(float(m_rglobalPara._height) / 2);
 
-	BYTE* tempHeightMap = new BYTE[m_rglobalPara._width*m_rglobalPara._height]; 
+	BYTE* tempHeightMap = new BYTE[m_rglobalPara._width*m_rglobalPara._height];
 	fread(tempHeightMap, 1, m_rglobalPara._width*m_rglobalPara._height, fp);
 
 	//std::auto_ptr<TileThread> pTile[16];
-	int index = 0; 
+	int index = 0;
 	int N = 1;
-	int tileSize = (m_rglobalPara._width - 1) / N +1;
+	int tileSize = (m_rglobalPara._width - 1) / N + 1;
 	for (int j = 0; j < N; j++)
 	{
 
@@ -123,9 +120,9 @@ void LODDrawable::init(const char* filename)
 			tileRange._centerX = i*tileSize + (tileSize - 1) / 2;
 
 			tileRange._centerY = j*tileSize + (tileSize - 1) / 2;
-			
+
 			tileRange._index_i = i;
-			tileRange._index_j= j;
+			tileRange._index_j = j;
 			tileRange._N = N;
 			pTile->init(tempHeightMap, m_rglobalPara, tileRange);
 
@@ -135,8 +132,8 @@ void LODDrawable::init(const char* filename)
 		}
 	}
 
-	
-	
+
+
 
 	delete[] tempHeightMap;
 	fclose(fp);
@@ -146,6 +143,26 @@ void LODDrawable::init(const char* filename)
 }
 
 
+int LODDrawable::getFieldHeight(int index, int x, int y)
+{
+
+	if (index >= m_vecTile.size() || index < 0)
+		return _LOD_ERROR;
+	if (x < 0)
+		x = 0;
+	if (y < 0)
+		y = 0;
+	x %= m_vecRange[index]._width;
+	y %= m_vecRange[index]._height;
+	return m_vecTile[index]->getHeight(x, y);
+
+}
+
+Range LODDrawable::getLODRange()
+{
+
+	return m_rglobalPara;
+}
 void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 {
 	osg::GLBeginEndAdapter& gl = renderInfo.getState()->getGLBeginEndAdapter();
@@ -153,19 +170,19 @@ void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 	osg::ref_ptr<osg::Camera> camera = renderInfo.getCurrentCamera();
 
 	osg::Vec3d eye, at, up;
-	camera->getViewMatrixAsLookAt(eye, at, up,2.0);
+	camera->getViewMatrixAsLookAt(eye, at, up, 2.0);
 	_LOG_MATRIX(camera->getViewMatrix(), "drawImplementation");
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glMatrixMode(GL_PROJECTION);
 
 	gluLookAt(eye.x(), eye.y(), eye.z(), at.x(), at.y(), at.z(), up.x(), up.y(), up.z());
-	
+
 	int sz = m_vecTile.size();
 	osg::ref_ptr<osg::DisplaySettings> ds = camera->getDisplaySettings();
 	for (int i = 0; i < sz; i++)
 	{
-		m_vecTile[i]->updateCameraInfo(eye,gl,renderInfo.getState());
+		m_vecTile[i]->updateCameraInfo(eye, gl, renderInfo.getState());
 #ifdef _GL_MT
 		m_vecTile[i]->run();
 #else
@@ -192,7 +209,7 @@ void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 		}
 		if (isStopped)
 			break;
-					
+
 	}
 #endif
 }

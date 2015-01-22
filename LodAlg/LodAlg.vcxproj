@@ -48,6 +48,8 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(OSG_ROOT);$(OSG_ROOT)\include;$(OSG_FILE_PATH);$(OSG_3RDPARTY_DIRS)\GDAL-1.1.1\include;$(BOOST);$(IncludePath)</IncludePath>
     <LibraryPath>$(OSG_ROOT)\lib;$(OSG_3RDPARTY_DIRS)\GDAL-1.1.1\lib;$(BOOST)\lib32-msvc-10.0;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Configuration)\bin</OutDir>
+    <IntDir>$(Configuration)\intermediate</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

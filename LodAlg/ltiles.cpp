@@ -17,12 +17,128 @@
 #define DEBUG_ENCODE_MSG(format,data,...) _DEBUG_ENCODE_MSG(_DEBUG_FILENAME_,format,data)
 
 #ifndef _GL_ELE_ARRAY
-	#define GL_BEGIN(status) glBegin(status)
-	#define GL_END() glEnd()
+#define GL_BEGIN(status) glBegin(status)
+#define GL_END() glEnd()
 #else
-	#define GL_BEGIN(status)
-	#define GL_END() glEnd()
+#define GL_BEGIN(status)
+#define GL_END() glEnd()
 #endif
+VAO::VAO()
+{
+
+	glGenBuffers(1, &m_vbo);
+
+	glGenBuffers(1, &m_ibo);
+
+	glGenVertexArrays(1, &m_vao);
+}
+VAO::~VAO()
+{
+
+	glDeleteBuffers(1, &m_vbo);
+	glDeleteBuffers(1, &m_ibo);
+	glDeleteVertexArrays(1, &m_vao);
+	m_vecVertex.clear();
+
+}
+
+void VAO::initVertex(const float* vertexs)
+{
+	float* p = const_cast<float*>(vertexs);
+	while (p != NULL && (p + 1) != NULL && (p + 2) != NULL)
+	{
+		for (int i = 0; i < 3; i++)
+			m_vecVertex.push_back(*(p++));
+
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+	glBufferData(GL_ARRAY_BUFFER, m_vecVertex.size()*sizeof(GLfloat), &m_vecVertex[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void VAO::initVertex(const BYTE* heightMap, int offset_col/*offset in x brought by tile generation.*/, int offset_row, Range rlocal, Range rglobal, int offset_x, int offset_y, int offset_z )
+{
+
+	BYTE* pHeight = const_cast<BYTE*>(heightMap);
+	for (int row = 0; row < rlocal._height; row++)
+	{
+		for (int col = 0; col < rlocal._width; col++)
+		{
+			BYTE* p = pHeight + (offset_row + rlocal._height - 1 - row)*rglobal._width + col + offset_col;
+			if (p == NULL)
+				continue;
+
+			m_vecVertex.push_back(col + offset_col + offset_x);
+			m_vecVertex.push_back(row + offset_row + offset_y);
+			m_vecVertex.push_back(*(p)+offset_z);
+
+		}
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+	glBufferData(GL_ARRAY_BUFFER, m_vecVertex.size()*sizeof(GLfloat), &m_vecVertex[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+
+}
+void VAO::initVertex(const BYTE* heightMap, int row_offset, int col_offset, int w, int h, int offset_x, int offset_y, int offset_z)
+{
+	BYTE* pHeight = const_cast<BYTE*>(heightMap);
+	for (int row = row_offset; row < row_offset + h; row++)
+	for (int col = col_offset; col < col_offset + w; col++)
+	{
+		BYTE* p = pHeight + (2 * row_offset + h - 1 - row)*w + col;
+		if (p == NULL)
+			continue;
+		m_vecVertex.push_back(col + offset_x);
+		m_vecVertex.push_back(row + offset_y);
+		m_vecVertex.push_back(*p + offset_z);
+
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+	glBufferData(GL_ARRAY_BUFFER, m_vecVertex.size()*sizeof(GLfloat), &m_vecVertex[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+void VAO::updateIndex(const UINT* indx, int size)
+{
+
+	m_index = const_cast<GLuint*>(indx);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size*sizeof(GLuint), m_index, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	glBindVertexArray(m_vao);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+void VAO::draw(int startIndex, int num)
+{
+	//We must make sure  it was complete triangles that were put into buffer.
+	assert(num % 3 == 0);
+
+	glBindVertexArray(m_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	for (int curIndex = 0; curIndex < num / 3; curIndex++)
+	{
+		//Here every face of the mesh is Visualized as a closed line loop.
+		glDrawElements(GL_LINE_LOOP, 3, GL_UNSIGNED_INT, (void*)(3 * curIndex*sizeof(GLuint)));
+	}
+	//glDrawElements(GL_LINE_LOOP, num, GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+}
 LODTile::LODTile()
 {
 
@@ -38,12 +154,12 @@ void LODTile::initParams()
 	m_LodMatrix.Reset(m_rlocalPara._width, m_rlocalPara._height);
 	m_DHMatrix.Reset(m_rlocalPara._width, m_rlocalPara._height);
 	for (int i = 0; i < m_rlocalPara._width; i++)
-		for (int j = 0; j < m_rlocalPara._height; j++)
-			m_LodMatrix(i, j) = VS_UNREACH;
+	for (int j = 0; j < m_rlocalPara._height; j++)
+		m_LodMatrix(i, j) = VS_UNREACH;
 	CalculateDHMatrix();
 
-	int sizeX = m_rlocalPara._width-1;
-	int sizeY = m_rlocalPara._height-1;
+	int sizeX = m_rlocalPara._width - 1;
+	int sizeY = m_rlocalPara._height - 1;
 
 	for (int i = 0; sizeX&&sizeY; i++)
 	{
@@ -60,28 +176,20 @@ void LODTile::init(BYTE* heightMat, const Range globalRange, const Range localRa
 
 	m_rlocalPara = localRange;
 	m_rglobalPara = globalRange;
-	int offsetCol= localRange._index_i*localRange._width;
+	int offsetCol = localRange._index_i*localRange._width;
 	int offsetRow = (localRange._N - 1 - localRange._index_j)*localRange._height;
 
 	m_HMMatrix.Reset(m_rlocalPara._width, m_rlocalPara._height);
 
 	m_HMMatrix.SetData(heightMat, offsetCol, offsetRow, globalRange._width, globalRange._height, localRange._width, localRange._height);
-	//m_vertexBuf.initVertex(heightMat, 
-	//						offsetX,
-	//						offsetY,
-	//						m_rlocalPara._width, 
-	//						m_rlocalPara._height,
-	//						m_rlocalPara._centerX - m_rlocalPara._width/2-m_rglobalPara._width/2,
-	//						m_rlocalPara._centerY - m_rlocalPara._height / 2-m_rglobalPara._height / 2,-100); 
 	m_vertexBuf.initVertex(heightMat,
-							offsetCol,
-							offsetRow,
-							localRange,
-							globalRange,
-							m_rlocalPara._centerX - m_rlocalPara._width/2-m_rglobalPara._width/2,
-							m_rlocalPara._centerY - m_rlocalPara._height / 2-m_rglobalPara._height / 2,
-							-100); 
-							
+		offsetCol,
+		offsetRow,
+		localRange,
+		globalRange,
+		m_rlocalPara._centerX - m_rlocalPara._width / 2 - m_rglobalPara._width / 2,
+		m_rlocalPara._centerY - m_rlocalPara._height / 2 - m_rglobalPara._height / 2,
+		-100);
 	initParams();
 
 
@@ -91,23 +199,23 @@ void LODTile::updateCameraInfo(osg::Vec3d& eye)
 	m_ViewX = eye.x();
 	m_ViewZ = eye.z();
 
-	m_ViewY= eye.y();
+	m_ViewY = eye.y();
 }
 
-void LODTile::updateCameraInfo(osg::Vec3d&	eye,osg::GLBeginEndAdapter& gl,osg::State* stat)	
+void LODTile::updateCameraInfo(osg::Vec3d&	eye, osg::GLBeginEndAdapter& gl, osg::State* stat)
 {
 	m_ViewX = eye.x();
 
 	m_ViewZ = eye.z();
 
-	m_ViewY= eye.y();
+	m_ViewY = eye.y();
 }
 
 
 
 void LODTile::BFSRender() const
 {
-	
+
 	std::vector<LNODE>  v1;
 	std::vector<LNODE>  v2;
 	std::vector<LNODE>* cur_Queue;
@@ -118,8 +226,8 @@ void LODTile::BFSRender() const
 	int dx = m_delta[0]._x;
 	int dy = m_delta[0]._y;
 	//Here we should use cx(y)=(w(h)-1)/2 instead of (w(h)-1)/1+1;	
-	int cx =floor(float (m_rlocalPara._width)/2);
-	int cy =floor(float (m_rlocalPara._height)/2);
+	int cx = floor(float(m_rlocalPara._width) / 2);
+	int cy = floor(float(m_rlocalPara._height) / 2);
 	//int cx = (m_rlocalPara._width ) / 2;
 	//int cy = (m_rlocalPara._height) / 2;
 	LNODE node(cx, cy, 0);
@@ -194,7 +302,7 @@ void LODTile::BFSRender() const
 }
 void LODTile::DrawIndexedPrimitive() const
 {
-	m_vertexBuf.updateIndex(&m_indexBuf[0],m_indexBuf.size());
+	m_vertexBuf.updateIndex(&m_indexBuf[0], m_indexBuf.size());
 	m_vertexBuf.draw(0, m_indexBuf.size());
 }
 int  LODTile::GetHeight(int x, int y) const
@@ -355,7 +463,7 @@ unsigned char LODTile::CanActive(int x, int y, int patchSizeX, int patchSizeY) c
 	local2Global(lx, ly, lz);
 	//VECTOR observeVec = VECTOR(x - m_rlocalPara._width / 2 - m_ViewX, y - m_rlocalPara._height / 2 - m_ViewY, z - 100 - m_ViewZ);
 
-	VECTOR observeVec = VECTOR(lx - m_ViewX, ly- m_ViewY, lz - m_ViewZ);
+	VECTOR observeVec = VECTOR(lx - m_ViewX, ly - m_ViewY, lz - m_ViewZ);
 
 	float fViewDistance = observeVec.length();
 	float f;
@@ -492,8 +600,8 @@ void LODTile::DrawPrim(int cx, int cy) const
 
 inline void LODTile::local2Global(int& x, int& y, int& z) const
 {
-	x += (m_rlocalPara._centerX - m_rlocalPara._width/2-m_rglobalPara._width/2);
-	y += (m_rlocalPara._centerY - m_rlocalPara._height / 2-m_rglobalPara._height / 2);
+	x += (m_rlocalPara._centerX - m_rlocalPara._width / 2 - m_rglobalPara._width / 2);
+	y += (m_rlocalPara._centerY - m_rlocalPara._height / 2 - m_rglobalPara._height / 2);
 	z -= 100;
 }
 inline void LODTile::GLVERTEX(int x, int y) const
@@ -536,18 +644,18 @@ void LODTile::DrawNode_FILL(int x, int z, int d, int dy) const
 #define APPLY_COLOR(index)\
 {\
 	switch (index)\
-	{		\
+{		\
 	case 0:\
-		glColor3f(1, 1, 1); break; \
+	glColor3f(1, 1, 1); break; \
 	case 1:\
-		glColor3f(1, 0, 0); break; \
+	glColor3f(1, 0, 0); break; \
 	case 2:\
-		glColor3f(0, 1, 0); break; \
+	glColor3f(0, 1, 0); break; \
 	case 3:\
-		glColor3f(0, 0, 1); break; \
+	glColor3f(0, 0, 1); break; \
 	default:\
-		glColor3f(1, 0.5, 1); break; \
-	}\
+	glColor3f(1, 0.5, 1); break; \
+}\
 }
 void LODTile::DrawNode_FRAME(int x, int z, int dx, int dy) const
 {
@@ -721,7 +829,7 @@ void LODTile::DrawNode_FRAME(int x, int z, int dx, int dy) const
 
 void LODTile::DrawPrim_FILL(int x, int z) const
 {
-	
+
 	DrawNode_FILL(x, z, 1, 1);
 }
 

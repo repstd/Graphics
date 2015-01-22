@@ -14,11 +14,13 @@
 #include <osgGA/StandardManipulator>
 #include <osgGA/GUIEventHandler>
 #include "lmanipulator.h"
+#include "linput.h"
 #include <osg/Node>
 #include <osg/BlendFunc>
 #include <OpenThreads\Thread>
 #define _HEIGHT_FIELD_FILE_RAW "./data/terrain.raw"
 #define _HEIGHT_FIELD_FILE_SRTM "./data/srtm_ramp2_world_5400x2700_2.jpg"
+#define _HEIGHT_FIELD_FILE_PUGET_ASC "E://1.MyDocuments//LOD//MSR_Hoppe_PM//psdem_2005//psdem//psdem_2005.asc"
 class camDrawcallback :public osg::Drawable::DrawCallback
 {
 
@@ -83,17 +85,20 @@ int _tmain(int argc, _TCHAR* argv[])
 	viewer.setThreadingModel(osgViewer::Viewer::SingleThreaded);
 	
 	viewer.realize();
-
 	osg::Matrixd cameraRotation;
 	cameraRotation.makeRotate(osg::DegreesToRadians(180.0), osg::Z_AXIS);
-	
 	viewer.getCamera()->getGraphicsContext()->makeCurrent();
-	
 	viewer.setDataVariance(osg::Object::DYNAMIC);
-
 	
+	std::unique_ptr<dataImp> rawdata(dataImpFactory::instance()->createRawImp(_HEIGHT_FIELD_FILE_RAW));
+	std::unique_ptr<dataImp> gdaldata(dataImpFactory::instance()->createGDALImp(_HEIGHT_FIELD_FILE_PUGET_ASC, "ASC"));
+
+	std::unique_ptr<heightField> input(new heightField(rawdata.release()));
+
 	LODDrawable* lod = new LODDrawable();
-	lod->initRaw(_HEIGHT_FIELD_FILE_RAW);
+
+	lod->init(input.release());
+
 	lod->setName("LOD");
 
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;

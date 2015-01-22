@@ -157,161 +157,47 @@ typedef struct _PatchSize
 typedef struct _Range
 {
 
-	int _width,_height;
-	int _centerX,_centerY;
+	int _width, _height;
+	int _centerX, _centerY;
 	int _index_i, _index_j;
 	int _N;
 } Range;
+
 
 class VAO
 {
 
 public:
-	VAO()
-	{
-
-		glGenBuffers(1, &m_vbo);
-		
-		glGenBuffers(1, &m_ibo);
-
-		glGenVertexArrays(1, &m_vao);
-
-		
-	}
-	~VAO()
-	{
-		glDeleteBuffers(1, &m_vbo);
-		glDeleteBuffers(1, &m_ibo);
-		glDeleteVertexArrays(1, &m_vao);
-		m_vecVertex.clear();
-
-	}
-	//[][3]
-	//A array of 3-d points,of which the actual size is 3*w*h;
+	VAO();
+	~VAO();
 public:
-	void initVertex(const float* vertexs)
-	{
-		float* p = const_cast<float*>(vertexs);
-		while (p != NULL && (p + 1) != NULL && (p + 2) != NULL)
-		{
-			for (int i = 0; i < 3; i++)
-				m_vecVertex.push_back(*(p++));
-
-		}
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-		glBufferData(GL_ARRAY_BUFFER, m_vecVertex.size()*sizeof(GLfloat), &m_vecVertex[0], GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-	void initVertex(const BYTE* heightMap, int offset_col/*offset in x brought by tile generation.*/, int offset_row, 
-					Range rlocal, Range rglobal,
-					int offset_x,int offset_y,int offset_z=-100)
-	{
-
-		BYTE* pHeight = const_cast<BYTE*>(heightMap);
-		for (int row = 0; row < rlocal._height; row++)
-		{
-			for (int col = 0; col < rlocal._width; col++)
-			{
-				BYTE* p = pHeight + (offset_row + rlocal._height - 1 - row)*rglobal._width + col+offset_col;
-				if (p == NULL)
-					continue;
-
-			m_vecVertex.push_back(col+offset_col+offset_x);
-			m_vecVertex.push_back(row + offset_row + offset_y);
-			m_vecVertex.push_back(*(p)+offset_z);
-
-			}
-		}
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-		glBufferData(GL_ARRAY_BUFFER, m_vecVertex.size()*sizeof(GLfloat), &m_vecVertex[0], GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-
-
-	}
-	void initVertex(const BYTE* heightMap,int row_offset,int col_offset,
-					int w, int h,
-					int offset_x,int offset_y,int offset_z)
-	{
-		BYTE* pHeight = const_cast<BYTE*>(heightMap);
-		for (int row = row_offset; row<row_offset + h; row++)
-			for (int col = col_offset; col < col_offset+w; col++)
-		{
-			BYTE* p = pHeight + (2*row_offset+h-1-row)*w + col;
-			if (p == NULL)
-				continue;
-			m_vecVertex.push_back(col+offset_x);
-			m_vecVertex.push_back(row+offset_y);
-			m_vecVertex.push_back(*p+offset_z);
-
-		}
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-		glBufferData(GL_ARRAY_BUFFER, m_vecVertex.size()*sizeof(GLfloat), &m_vecVertex[0], GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-	void updateIndex(const UINT* indx, int size)
-	{
-
-		m_index = const_cast<GLuint*>(indx);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size*sizeof(GLuint), m_index, GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-		glBindVertexArray(m_vao);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0,NULL);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-	}
-	void draw(int startIndex, int num)
-	{
-		//We must make sure  it was complete triangles that were put into buffer.
-		assert(num % 3 == 0);
-
-		glBindVertexArray(m_vao);	
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
-
-		glEnableClientState(GL_VERTEX_ARRAY);
-		for (int curIndex = 0; curIndex < num / 3; curIndex++)
-		{
-			//Here every face of the mesh is Visualized as a closed line loop.
-			glDrawElements(GL_LINE_LOOP, 3, GL_UNSIGNED_INT, (void*)(3*curIndex*sizeof(GLuint)));
-		}
-		//glDrawElements(GL_LINE_LOOP, num, GL_UNSIGNED_INT, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-
-	}
+	void initVertex(const float* vertexs);
+	void initVertex(const BYTE* heightMap, int offset_col/*offset in x brought by tile generation.*/, int offset_row, Range rlocal, Range rglobal, int offset_x, int offset_y, int offset_z = -100);
+	void initVertex(const BYTE* heightMap, int row_offset, int col_offset, int w, int h, int offset_x, int offset_y, int offset_z);
+	void updateIndex(const UINT* indx, int size);
+	void draw(int startIndex, int num);
 private:
 	GLuint* m_index;
 	GLuint m_ibo, m_vbo;
 	GLuint m_vao;
 	std::vector<GLfloat> m_vecVertex;
 	std::vector<GLint> m_vecIndex;
-
 };
-class LODTile 
+class LODTile
 {
 public:
 	LODTile();
 
 
-	void init(BYTE* heightMat, const Range globalRange,const Range localRange);
+	void init(BYTE* heightMat, const Range globalRange, const Range localRange);
 	void updateCameraInfo(osg::Vec3d& eye);
-	void updateCameraInfo(osg::Vec3d&	eye, osg::GLBeginEndAdapter& gl,osg::State* stat);
+	void updateCameraInfo(osg::Vec3d&	eye, osg::GLBeginEndAdapter& gl, osg::State* stat);
 
 	int   GetHeight(int x, int y) const;
 	float GetAveHeight(float x, float y) const;
 
 	void BFSRender() const;
-	
+
 	void BFSRenderPrimitive() const;
 	void DrawIndexedPrimitive() const;
 private:

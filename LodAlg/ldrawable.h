@@ -10,7 +10,7 @@
 #include "lthreads.h"
 #include <vector>
 #include <assert.h>
-
+#include "linput.h"
 
 typedef TileThreadW TileThread;
 typedef TileThread* PTileThread;
@@ -26,28 +26,11 @@ public:
 
 	LODDrawable();
 	~LODDrawable();
-
 	void init(const char* heightFiledMap);
-	void initRaw(const char* heightFiledMap);
-	int getFieldHeight(int index,int x, int y)
-	{
-		if (index >= m_vecTile.size() || index < 0)
-			return _LOD_ERROR;
-		if (x < 0)
-			x = 0;
-		if (y < 0)
-			y = 0;
-		x %= m_vecRange[index]._width;
-		y %= m_vecRange[index]._height;
-		return m_vecTile[index]->getHeight(x, y);
-	}
-	Range getLODRange()
-	{
-	
-		return m_rglobalPara;
-	}
+	void init(heightField* input);
+	int getFieldHeight(int index, int x, int y);
+	Range getLODRange();
 private:
-
 	void drawImplementation(osg::RenderInfo& renderInfo) const;
 	std::vector<std::auto_ptr<TileThread>> m_vecTile;
 	std::vector<Range> m_vecRange;

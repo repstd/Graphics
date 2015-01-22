@@ -87,7 +87,7 @@ const char*   rawDataProxy::getFilename()
 {
 	return m_filename.c_str();
 }
-dataImp* rawDataProxy::getInputData()
+rawData* rawDataProxy::getInputData()
 {
 	return m_rawData.get();
 }
@@ -136,15 +136,41 @@ extent gdalData::getExtent()
 	getExtent(ext);
 	return ext;
 }
+
+void gdalData::clip()
+{
+	//We only need a region whose size is (2^n+1)*(2^n+1)
+	extent ext;
+	getExtent(ext);
+	int originalWidth = ext._width;
+	int originalHeight = ext._height;
+	float	m = log((float)originalWidth) / log(2.0f);
+	float	n = log((float)originalHeight) / log(2.0f);
+
+	int exp = ([](int a, int b){return a>b?b:a; })(m, n);
+
+	int cliped = pow(2.0, exp) + 1;
+
+	setSize(cliped, cliped);
+
+}
+void gdalData::setSize(int width, int height)
+{
+	m_iRasterWidth = width;
+	m_iRasterHeight = height;
+}
 void gdalDataProxy::load(const char* filename, const char* driverName)
 {
 	m_driverName = driverName;
 	m_filename = filename;
-	std::unique_ptr<GDALDriver> temp(GetGDALDriverManager()->GetDriverByName(driverName));
-	m_driver = std::move(temp);
-	temp.release();
+	std::unique_ptr<GDALDriver> tempDriver(GetGDALDriverManager()->GetDriverByName(driverName));
+	m_driver= std::move(tempDriver);
+	tempDriver.release();
+	std::unique_ptr<gdalData> tempGdalData(new gdalData);
+	m_gdalData = std::move(tempGdalData);
+	tempGdalData.release();
 	getInputData()->load(filename, driverName);
-					
+	getInputData()->clip();
 }
 void gdalDataProxy::getExtent(extent& extent)
 {
@@ -160,11 +186,13 @@ void gdalDataProxy::getTile(BYTE* dst, int row, int col, int N)
 	GDALDataset* src = (GDALDataset*)GDALOpen(getFilename(), GA_ReadOnly);
 	assert(src != NULL);
 	extent ext = getExtent();
-	int tileWidth = (ext._width - 1) / 2 + 1;
-	int tileHeight = (ext._height - 1) / 2 + 1;
+	int tileWidth = (ext._width - 1) / N + 1;
+	int tileHeight = (ext._height - 1) / N + 1;
 	BYTE* buf = (BYTE*)CPLCalloc(tileWidth*tileHeight * 1 * sizeof(BYTE), 1);
-	src->RasterIO(GF_Read, col*(tileWidth - 1), row*(tileHeight - 1), tileWidth, tileHeight, buf, tileWidth, tileHeight, GDT_Byte, 1, NULL, 0, 1, 0);
-	getInputData()->getTile(buf, dst, row, col, N);
+	src->RasterIO(GF_Read, col*(tileWidth - 1), row*(tileHeight - 1), tileWidth, tileHeight, buf, tileWidth, tileHeight, GDT_Byte, 1, NULL, 1, 0, 1);
+
+	getTile(buf, dst, row, col, N);
+
 	GDALClose(src);
 	CPLFree(buf);
 }
@@ -180,7 +208,18 @@ const char* gdalDataProxy::getDrivername()
 {
 	return m_driverName.c_str();
 }
-dataImp* gdalDataProxy::getInputData()
+
+void gdalDataProxy::setSize(int width, int height)
+{
+
+	getInputData()->setSize(width, height);
+
+}
+void gdalDataProxy::clip()
+{
+	getInputData()->clip();
+}
+gdalData* gdalDataProxy::getInputData()
 {
 	return m_gdalData.get();
 }
@@ -284,14 +323,14 @@ int heightField::getTileCenterX(int i, int j, int N)
 {
 	int tileWidth = getTileWidth(i, j, N);
 	int tileWidthEven = tileWidth - 1;
-	return i*tileWidthEven + tileWidth >> 1;
+	return i*tileWidthEven + tileWidth / 2;
 
 }
 int heightField::getTileCenterY(int i, int j, int N)
 {
 	int tileHeight = getTileHeight(i, j, N);
 	int tileHeightEven = tileHeight - 1;
-	return j*tileHeightEven + tileHeight >> 1;
+	return j*tileHeightEven + tileHeight / 2;
 }
 void heightField::generateTile(int i, int j, int N, BYTE* dst, Range& tileRange)
 {
