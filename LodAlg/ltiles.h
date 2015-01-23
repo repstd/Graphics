@@ -185,8 +185,8 @@ public:
 	~VAO();
 public:
 	void initVertex(const float* vertexs);
-	void initVertex(const BYTE* heightMap, int offset_col, int offset_row, Range rlocal, Range rglobal, int offset_x, int offset_y, int offset_z = -100,bool isFlip=true);
-	void initVertex(const BYTE* heightMap, int row_offset, int col_offset, int w, int h, int offset_x, int offset_y, int offset_z,bool isFlip=true);
+	void initVertex(const BYTE* heightMap, int offset_col, int offset_row, Range rlocal, Range rglobal, int offset_x, int offset_y, int offset_z = -100, bool isFlip = true);
+	void initVertex(const BYTE* heightMap, int row_offset, int col_offset, int w, int h, int offset_x, int offset_y, int offset_z, bool isFlip = true);
 	void updateIndex(const UINT* indx, int size);
 	void draw(int startIndex, int num);
 private:

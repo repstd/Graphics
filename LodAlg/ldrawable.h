@@ -23,7 +23,8 @@ public:
 	virtual void drawImplementation(osg::RenderInfo& renderInfo) const = 0;;
 	virtual PTileThread getTile(int index){ return NULL; }
 	Range getLODRange();
-protected:
+	void setGlobalRange(Range range);
+private:
 	Range m_rglobalPara;
 };
 
@@ -48,6 +49,7 @@ public:
 protected:
 	lodImpFactory();
 };
+
 class LODDrawable :public osg::Drawable
 {
 public:

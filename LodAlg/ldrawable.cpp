@@ -35,6 +35,10 @@ Range lodImp::getLODRange()
 {
 	return m_rglobalPara;
 }
+void lodImp::setGlobalRange(Range range)
+{
+	m_rglobalPara = range;
+}
 lodImpFactory::lodImpFactory()
 {
 	return;
@@ -58,12 +62,16 @@ quadTreeImp::quadTreeImp() :lodImp()
 void quadTreeImp::init(heightField* input)
 { 
 
-	m_rglobalPara._width = input->getWidth();
-	m_rglobalPara._height = input->getHeight();
-	m_rglobalPara._centerX = input->getCenterX();
-	m_rglobalPara._centerY = input->getCenterY();
+	Range global;
+	global._width = input->getWidth();
+	global._height = input->getHeight();
+	global._centerX = input->getCenterX();
+	global._centerY = input->getCenterY();
+
+	setGlobalRange(global);
 	int index;
 	int N = 2;
+
 	for (int i = 0; i < N; i++)
 	{
 		for (int j = 0;j < N; j++)
@@ -182,8 +190,8 @@ int LODDrawable::getFieldHeight(int index, int x, int y)
 	Range region = getImp()->getTile(index)->getLocalRange();
 	int rx = x%region._width;
 	int ry = y%region._height;
-	int height=getImp()->getTile(index)->getHeight(rx, ry);
-	return height;
+
+	return getImp()->getTile(index)->getHeight(rx, ry);
 }
 
 Range LODDrawable::getLODRange()
