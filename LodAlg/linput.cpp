@@ -2,6 +2,20 @@
 #include "linput.h"
 #include <iostream>
 #include "ltiles.h"
+
+void dataImp::flipBuffer(BYTE* src, int width, int height)
+{
+	BYTE* temp = new unsigned char[width];
+	int top = 0;
+	int bottom = height - 1;
+	while (bottom > top)
+	{
+		memcpy(temp, src + top*width, width);
+		memcpy(src + (top++)*width, src + bottom*width, width);
+		memcpy(src + (bottom--)*width, temp, width);
+	}
+
+}
 rawData::rawData() :dataImp()
 {
 }
@@ -178,6 +192,7 @@ void gdalDataProxy::getTile(BYTE* src, BYTE* dst, int row, int col, int N)
 {
 	getInputData()->getTile(src, dst, row, col, N);
 }
+
 void gdalDataProxy::getTile(BYTE* dst, int row, int col, int N)
 {
 
@@ -186,8 +201,15 @@ void gdalDataProxy::getTile(BYTE* dst, int row, int col, int N)
 	extent ext = getExtent();
 	int tileWidth = (ext._width - 1) / N + 1;
 	int tileHeight = (ext._height - 1) / N + 1;
+
+	int srcOffsetX = row*(tileWidth-1);
+	int srcOffsetY = (N - 1 - col)*(tileHeight-1);
+
 	BYTE* buf = (BYTE*)CPLCalloc(tileWidth*tileHeight * 1 * sizeof(BYTE), 1);
-	src->RasterIO(GF_Read, col*(tileWidth - 1), row*(tileHeight - 1), tileWidth, tileHeight, buf, tileWidth, tileHeight, GDT_Byte, 1, NULL, 1, 0, 1);
+	
+	CPLErr error=src->RasterIO(GF_Read, srcOffsetX, srcOffsetY, tileWidth, tileHeight, buf, tileWidth, tileHeight, GDT_Byte, 1, NULL, 1, 0, 1);
+	
+	flipBuffer(buf, tileWidth, tileHeight);
 
 	getTile(buf, dst, row, col, N);
 

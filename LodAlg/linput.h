@@ -21,6 +21,9 @@ public:
 	virtual extent getExtent() = 0;
 	virtual void getTile(BYTE*, BYTE*, int, int, int) = 0;
 	virtual void getTile(BYTE*, int, int, int){ return; }
+
+	void flipBuffer(BYTE* src,int width,int height);
+
 protected:
 	dataImp() { return; }
 };
@@ -128,7 +131,6 @@ public:
 	int getTileWidth(int i, int j, int N);
 	int getTileHeight(int i, int j, int N);
 	int getTileCenterX(int i, int j, int N);
-
 	int getTileCenterY(int i, int j, int N);
 	void generateTile(int i, int j, int N, BYTE* dst, Range& tileRange);
 	void generateTile(int i, int j, int N, BYTE* dst, Range& tileRange,Range& globalRange);

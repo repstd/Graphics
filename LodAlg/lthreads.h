@@ -4,12 +4,6 @@
 #include "Matrix.h"
 #include "ltiles.h"
 #include "linput.h"
-#ifndef TileThread
-#define TileThread TileThreadW
-#else
-#pragma error( "TileThread Macro Not Avaliable." )
-
-#endif
 
 class TileThreadP : public OpenThreads::Thread
 {
@@ -50,7 +44,6 @@ public:
 	void updateCameraInfo(osg::Vec3d& eye) const;
 	void updateCameraInfo(osg::Vec3d& eye, osg::GLBeginEndAdapter& gl, osg::State* stat) const;
 	static void EventLoop(void * para);
-
 	int getStatus();
 	const bool isRunning();
 	void BFSRender() const;

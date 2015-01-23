@@ -28,27 +28,40 @@ void saveBMP(int width, int height, int channel, BYTE* data, char* filename, int
 
 	m_bmpWirter->writeImage(*img, filename);
 }
-
-LODDrawable::LODDrawable()
-
-{
-	setSupportsDisplayList(false);
-	glewInit();
-
-
-}
-
-LODDrawable::~LODDrawable()
+lodImp::lodImp()
 {
 }
-
-void LODDrawable::init(heightField* input)
+Range lodImp::getLODRange()
 {
+	return m_rglobalPara;
+}
+lodImpFactory::lodImpFactory()
+{
+	return;
+}
+
+lodImpFactory* lodImpFactory::instance()
+{
+	static lodImpFactory inst;
+	return &inst;
+}
+lodImp* lodImpFactory::createQuadTreeImp()
+{
+	std::unique_ptr<quadTreeImp> qtreeAlg(new quadTreeImp);
+	return qtreeAlg.release();
+}
+
+quadTreeImp::quadTreeImp() :lodImp()
+{
+
+}
+void quadTreeImp::init(heightField* input)
+{ 
+
 	m_rglobalPara._width = input->getWidth();
 	m_rglobalPara._height = input->getHeight();
 	m_rglobalPara._centerX = input->getCenterX();
 	m_rglobalPara._centerY = input->getCenterY();
-
 	int index;
 	int N = 2;
 	for (int i = 0; i < N; i++)
@@ -61,102 +74,13 @@ void LODDrawable::init(heightField* input)
 			m_vecRange.push_back(pTile->getLocalRange());
 		}
 	}
-	N = 3;
 	return;
 	//delete[] tempHeightMap;
-}
-
-
-void LODDrawable::init(const char* filename)
-{
-
-	FILE *fp = fopen(filename, "rb");
-	if (fp == NULL)
-	{
-		return;
-	}
-
-	long sz;
-	fseek(fp, 0, std::ios::end);
-	sz = ftell(fp);
-	fseek(fp, 0, std::ios::beg);
-
-
-
-	m_rglobalPara._width = sqrt(double(sz));
-
-	//TODO: fix me. We should handle the case that the terrain differs in height and width.@yulw
-	m_rglobalPara._height = m_rglobalPara._width;
-
-	m_rglobalPara._centerX = floor(float(m_rglobalPara._width) / 2);
-	m_rglobalPara._centerY = floor(float(m_rglobalPara._height) / 2);
-
-	BYTE* tempHeightMap = new BYTE[m_rglobalPara._width*m_rglobalPara._height];
-	fread(tempHeightMap, 1, m_rglobalPara._width*m_rglobalPara._height, fp);
-
-	//std::auto_ptr<TileThread> pTile[16];
-	int index = 0;
-	int N = 2;
-	int tileSize = (m_rglobalPara._width - 1) / N + 1;
-	for (int j = 0; j < N; j++)
-	{
-
-		for (int i = 0; i < N; i++)
-		{
-
-			index = j * N + i;
-			PTileThread	pTile = new TileThread();
-			Range tileRange;
-			tileRange._width = tileRange._height = tileSize;
-
-			tileRange._centerX = i*tileSize + (tileSize - 1) / 2;
-
-			tileRange._centerY = j*tileSize + (tileSize - 1) / 2;
-
-			tileRange._index_i = i;
-			tileRange._index_j = j;
-			tileRange._N = N;
-			pTile->init(tempHeightMap, m_rglobalPara, tileRange);
-
-			m_vecTile.push_back(std::auto_ptr<TileThread>(pTile));
-
-			m_vecRange.push_back(tileRange);
-		}
-	}
-
-
-
-
-	delete[] tempHeightMap;
-	fclose(fp);
-
-	return;
 
 }
-
-
-int LODDrawable::getFieldHeight(int index, int x, int y)
+void quadTreeImp::drawImplementation(osg::RenderInfo& renderInfo) const
 {
 
-	if (index >= m_vecTile.size() || index < 0)
-		return _LOD_ERROR;
-	if (x < 0)
-		x = 0;
-	if (y < 0)
-		y = 0;
-	x %= m_vecRange[index]._width;
-	y %= m_vecRange[index]._height;
-	return m_vecTile[index]->getHeight(x, y);
-
-}
-
-Range LODDrawable::getLODRange()
-{
-
-	return m_rglobalPara;
-}
-void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
-{
 	osg::GLBeginEndAdapter& gl = renderInfo.getState()->getGLBeginEndAdapter();
 
 	osg::ref_ptr<osg::Camera> camera = renderInfo.getCurrentCamera();
@@ -182,6 +106,7 @@ void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 #endif
 		//m_vecTile[i]->start();
 	}
+
 #ifdef _GL_MT
 	for (int i = 0; i < sz; i++)
 	{
@@ -201,9 +126,75 @@ void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
 		}
 		if (isStopped)
 			break;
-
 	}
 #endif
+
+}
+PTileThread quadTreeImp::getTile(int index)
+{
+	if (index < 0 || index >= m_vecTile.size())
+		index = 0;
+	return m_vecTile[index].get();
+}
+LODDrawable::LODDrawable()
+
+{
+	setSupportsDisplayList(false);
+	glewInit();
+
+}
+LODDrawable::LODDrawable(lodImp* imp)
+{
+	setSupportsDisplayList(false);
+	glewInit();
+
+	setImp(imp);
+}
+LODDrawable::~LODDrawable()
+{
+
+}
+
+void LODDrawable::setImp(lodImp* imp)
+{
+	std::unique_ptr<lodImp> temp(imp);
+	m_implementation = std::move(temp);
+	temp.release();
+}
+lodImp* LODDrawable::getImp() const
+{
+	return m_implementation.get();
+}
+void LODDrawable::init(heightField* input)
+{
+	getImp()->init(input);
+}
+
+
+void LODDrawable::init(const char* filename)
+{
+	getImp()->init(filename);
+}
+
+
+int LODDrawable::getFieldHeight(int index, int x, int y)
+{
+	Range region = getImp()->getTile(index)->getLocalRange();
+	int rx = x%region._width;
+	int ry = y%region._height;
+	int height=getImp()->getTile(index)->getHeight(rx, ry);
+	return height;
+}
+
+Range LODDrawable::getLODRange()
+{
+	return getImp()->getLODRange();
+}
+void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const
+{
+
+	getImp()->drawImplementation(renderInfo);
+
 }
 
 

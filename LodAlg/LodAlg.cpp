@@ -90,13 +90,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	viewer.getCamera()->getGraphicsContext()->makeCurrent();
 	viewer.setDataVariance(osg::Object::DYNAMIC);
 	
-	std::unique_ptr<dataImp> rawdata(dataImpFactory::instance()->createRawImp(_HEIGHT_FIELD_FILE_RAW));
-	//std::unique_ptr<dataImp> gdaldata(dataImpFactory::instance()->createGDALImp(_HEIGHT_FIELD_FILE_PUGET_ASC, "ASC"));
-
-	std::unique_ptr<heightField> input(new heightField(rawdata.release()));
-
-	LODDrawable* lod = new LODDrawable();
-
+	//std::unique_ptr<dataImp> rawdata(dataImpFactory::instance()->createRawImp(_HEIGHT_FIELD_FILE_RAW));
+	std::unique_ptr<dataImp> gdaldata(dataImpFactory::instance()->createGDALImp(_HEIGHT_FIELD_FILE_SRTM, "GeoTiff"));
+	std::unique_ptr<heightField> input(new heightField(gdaldata.release()));
+	LODDrawable* lod = new LODDrawable(lodImpFactory::instance()->createQuadTreeImp());
 	lod->init(input.release());
 	//lod->init(_HEIGHT_FIELD_FILE_RAW);
 	lod->setName("LOD");
@@ -120,6 +117,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//manipulator->setUserData(lod);
 	viewer.setCameraManipulator(manipulator);
+	viewer.getCamera()->setCullingMode(osg::CullSettings::FAR_PLANE_CULLING);
 	viewer.setSceneData(geode);
 	viewer.setRunMaxFrameRate(90);
 	viewer.addEventHandler(new  osgViewer::StatsHandler);

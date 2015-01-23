@@ -14,6 +14,40 @@
 
 typedef TileThreadW TileThread;
 typedef TileThread* PTileThread;
+class lodImp
+{
+public:	
+	lodImp();
+	virtual void init(heightField* input){ return; }
+	virtual void init(const char* heightField){ return; }
+	virtual void drawImplementation(osg::RenderInfo& renderInfo) const = 0;;
+	virtual PTileThread getTile(int index){ return NULL; }
+	Range getLODRange();
+protected:
+	Range m_rglobalPara;
+};
+
+class quadTreeImp :public lodImp
+{
+public:
+	virtual void init(heightField* input);
+	virtual void drawImplementation(osg::RenderInfo& renderInfo) const;
+	virtual PTileThread getTile(int index);
+protected:
+	quadTreeImp();
+	std::vector<std::auto_ptr<TileThread>> m_vecTile;
+	std::vector<Range> m_vecRange;
+	friend class lodImpFactory;
+};
+
+class lodImpFactory
+{
+public:
+	static lodImpFactory* instance();
+	lodImp* createQuadTreeImp();
+protected:
+	lodImpFactory();
+};
 class LODDrawable :public osg::Drawable
 {
 public:
@@ -23,16 +57,16 @@ public:
 	{
 	}
 	META_Object(osg, LODDrawable);
-
 	LODDrawable();
+	LODDrawable(lodImp*);
 	~LODDrawable();
 	void init(const char* heightFiledMap);
 	void init(heightField* input);
+	void setImp(lodImp* imp);
+	lodImp* getImp() const;
 	int getFieldHeight(int index, int x, int y);
 	Range getLODRange();
 private:
 	void drawImplementation(osg::RenderInfo& renderInfo) const;
-	std::vector<std::auto_ptr<TileThread>> m_vecTile;
-	std::vector<Range> m_vecRange;
-	Range m_rglobalPara;
+	std::unique_ptr<lodImp> m_implementation;
 };
