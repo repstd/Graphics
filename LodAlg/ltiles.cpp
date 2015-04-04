@@ -57,7 +57,7 @@ void VAO::initVertex(const float* vertexs)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void VAO::initVertex(const BYTE* heightMap, int offset_col, int offset_row, Range rlocal, Range rglobal, int offset_x, int offset_y, int offset_z ,bool isFlip)
+void VAO::initVertex(const BYTE* heightMap, int offset_col, int offset_row, Range rlocal, Range rglobal, int offset_x, int offset_y, int offset_z, bool isFlip)
 {
 
 	BYTE* pHeight = const_cast<BYTE*>(heightMap);
@@ -95,7 +95,7 @@ void VAO::initVertex(const BYTE* heightMap, int offset_col, int offset_row, Rang
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 }
-void VAO::initVertex(const BYTE* heightMap, int row_offset, int col_offset, int w, int h, int offset_x, int offset_y, int offset_z,bool isFlip)
+void VAO::initVertex(const BYTE* heightMap, int row_offset, int col_offset, int w, int h, int offset_x, int offset_y, int offset_z, bool isFlip)
 {
 	BYTE* pHeight = const_cast<BYTE*>(heightMap);
 	for (int row = row_offset; row < row_offset + h; row++)
@@ -216,23 +216,23 @@ void LODTile::init(BYTE* heightMat, const Range globalRange, const Range localRa
 
 void LODTile::init(heightField* input, int i, int j, int N)
 {
-	BYTE* temp = new unsigned char[input->getTileWidth(i,j,N)* input->getTileHeight(i,j,N)];
+	BYTE* temp = new unsigned char[input->getTileWidth(i, j, N)* input->getTileHeight(i, j, N)];
 
-	input->generateTile(i, j, N, temp, m_rlocalPara,m_rglobalPara);
+	input->generateTile(i, j, N, temp, m_rlocalPara, m_rglobalPara);
 
 	int offsetCol = m_rlocalPara._index_i*m_rlocalPara._width;
 	int offsetRow = (m_rlocalPara._N - 1 - m_rlocalPara._index_j)*m_rlocalPara._height;
 
 	m_HMMatrix.Reset(m_rlocalPara._width, m_rlocalPara._height);
-	m_HMMatrix.SetData(temp, 0, 0, m_rlocalPara._width, m_rlocalPara._height, m_rlocalPara._width, m_rlocalPara._height,false);
-	m_vertexBuf.initVertex(temp, 
-		offsetCol, 
-		offsetRow, 
-		m_rlocalPara, 
+	m_HMMatrix.SetData(temp, 0, 0, m_rlocalPara._width, m_rlocalPara._height, m_rlocalPara._width, m_rlocalPara._height, false);
+	m_vertexBuf.initVertex(temp,
+		offsetCol,
+		offsetRow,
+		m_rlocalPara,
 		m_rlocalPara,
 		m_rlocalPara._centerX - m_rlocalPara._width / 2 - m_rglobalPara._width / 2,
 		m_rlocalPara._centerY - m_rlocalPara._height / 2 - m_rglobalPara._height / 2,
-		-100,false);
+		-100, false);
 
 	delete[] temp;
 
@@ -694,126 +694,129 @@ void LODTile::DrawNode_FILL(int x, int z, int d, int dy) const
 	glColor3f(1, 0.5, 1); break; \
 }\
 }
-//void LODTile::DrawNode_FRAME(int x, int z, int dx, int dy) const
-//{
-//
-//
-//	glPushAttrib(GL_COLOR);
-//	APPLY_COLOR(m_rlocalPara._index_i*m_rlocalPara._N + m_rlocalPara._index_j);
-//
-//	GL_BEGIN(GL_LINE_STRIP);
-//	GLVERTEX(x + dx, z - dy);
-//	GLVERTEX(x, z);
-//	GLVERTEX(x - dx, z + dy);
-//	if (m_neighbor[NV_L] == VS_ACTIVE)
-//		GLVERTEX(x - dx, z);
-//	GLVERTEX(x - dx, z - dy);
-//	if (m_neighbor[NV_D] == VS_ACTIVE)
-//		GLVERTEX(x, z - dy);
-//	GLVERTEX(x + dx, z - dy);
-//	if (m_neighbor[NV_R] == VS_ACTIVE)
-//		GLVERTEX(x + dx, z);
-//	GLVERTEX(x + dx, z + dy);
-//	if (m_neighbor[NV_U] == VS_ACTIVE)
-//		GLVERTEX(x, z + dy);
-//	GLVERTEX(x - dx, z + dy);
-//	GL_END();
-//	GL_BEGIN(GL_LINE_STRIP);
-//	GLVERTEX(x - dx, z - dy);
-//	GLVERTEX(x, z);
-//	GLVERTEX(x + dx, z + dy);
-//	GL_END();
-//	GL_BEGIN(GL_LINE_STRIP);
-//	if (m_neighbor[NV_D] == VS_ACTIVE)
-//		GLVERTEX(x, z - dy);
-//	GLVERTEX(x, z);
-//	if (m_neighbor[NV_U] == VS_ACTIVE)
-//		GLVERTEX(x, z + dy);
-//	GL_END();
-//	GL_BEGIN(GL_LINE_STRIP);
-//	if (m_neighbor[NV_L] == VS_ACTIVE)
-//		GLVERTEX(x - dx, z);
-//	GLVERTEX(x, z);
-//	if (m_neighbor[NV_R] == VS_ACTIVE)
-//		GLVERTEX(x + dx, z);
-//	GL_END();
-//	glPushAttrib(GL_COLOR);
-//}
 
-//void LODTile::DrawNode_FRAME(int x, int y, int dx, int dy) const
-//{
-//	
-//
-//	glPushAttrib(GL_COLOR);
-//	//left
-//	if (m_neighbor[NV_L] == VS_ACTIVE)
-//	{
-//		GLVERTEX(x, y);
-//		GLVERTEX(x - dx, y + dy);
-//		GLVERTEX(x - dx, y);
-//		GLVERTEX(x, y);
-//		GLVERTEX(x - dx, y);
-//		GLVERTEX(x - dx, y - dy);
-//	}
-//	else
-//	{
-//		GLVERTEX(x, y);
-//		GLVERTEX(x - dx, y + dy);
-//		GLVERTEX(x - dx, y - dy);
-//	}
-//	//down
-//	if (m_neighbor[NV_D] == VS_ACTIVE)
-//	{
-//
-//		GLVERTEX(x, y);
-//		GLVERTEX(x - dx, y - dy);
-//		GLVERTEX(x, y - dy);
-//		GLVERTEX(x, y);
-//		GLVERTEX(x, y - dy);
-//		GLVERTEX(x + dx, y - dy);
-//	}
-//	else
-//	{
-//		GLVERTEX(x, y);
-//		GLVERTEX(x - dx, y - dy);
-//		GLVERTEX(x + dx, y - dy);
-//	}
-//	//right
-//	if (m_neighbor[NV_R] == VS_ACTIVE)
-//	{
-//		GLVERTEX(x, y);
-//		GLVERTEX(x + dx, y - dy);
-//		GLVERTEX(x + dx, y);
-//		GLVERTEX(x, y);
-//		GLVERTEX(x + dx, y);
-//		GLVERTEX(x + dx, y + dy);
-//
-//	}
-//	else
-//	{
-//		GLVERTEX(x, y);
-//		GLVERTEX(x + dx, y - dy);
-//		GLVERTEX(x + dx, y + dy);
-//	}
-//	//up
-//	if (m_neighbor[NV_U] == VS_ACTIVE)
-//	{
-//		GLVERTEX(x, y);
-//		GLVERTEX(x, y + dy);
-//		GLVERTEX(x - dx, y + dy);
-//		GLVERTEX(x, y);
-//		GLVERTEX(x + dx, y + dy);
-//		GLVERTEX(x, y + dy);
-//	}
-//	else
-//	{
-//		GLVERTEX(x, y);
-//		GLVERTEX(x + dx, x + dy);
-//		GLVERTEX(x - dx, y + dy);
-//	}
-//}
+#ifdef _DRAW_METHOD_1
+void LODTile::DrawNode_FRAME(int x, int z, int dx, int dy) const
+{
 
 
+	glPushAttrib(GL_COLOR);
+	APPLY_COLOR(m_rlocalPara._index_i*m_rlocalPara._N + m_rlocalPara._index_j);
+
+	GL_BEGIN(GL_LINE_STRIP);
+	GLVERTEX(x + dx, z - dy);
+	GLVERTEX(x, z);
+	GLVERTEX(x - dx, z + dy);
+	if (m_neighbor[NV_L] == VS_ACTIVE)
+		GLVERTEX(x - dx, z);
+	GLVERTEX(x - dx, z - dy);
+	if (m_neighbor[NV_D] == VS_ACTIVE)
+		GLVERTEX(x, z - dy);
+	GLVERTEX(x + dx, z - dy);
+	if (m_neighbor[NV_R] == VS_ACTIVE)
+		GLVERTEX(x + dx, z);
+	GLVERTEX(x + dx, z + dy);
+	if (m_neighbor[NV_U] == VS_ACTIVE)
+		GLVERTEX(x, z + dy);
+	GLVERTEX(x - dx, z + dy);
+	GL_END();
+	GL_BEGIN(GL_LINE_STRIP);
+	GLVERTEX(x - dx, z - dy);
+	GLVERTEX(x, z);
+	GLVERTEX(x + dx, z + dy);
+	GL_END();
+	GL_BEGIN(GL_LINE_STRIP);
+	if (m_neighbor[NV_D] == VS_ACTIVE)
+		GLVERTEX(x, z - dy);
+	GLVERTEX(x, z);
+	if (m_neighbor[NV_U] == VS_ACTIVE)
+		GLVERTEX(x, z + dy);
+	GL_END();
+	GL_BEGIN(GL_LINE_STRIP);
+	if (m_neighbor[NV_L] == VS_ACTIVE)
+		GLVERTEX(x - dx, z);
+	GLVERTEX(x, z);
+	if (m_neighbor[NV_R] == VS_ACTIVE)
+		GLVERTEX(x + dx, z);
+	GL_END();
+	glPushAttrib(GL_COLOR);
+}
+#endif
+#ifdef _DRAW_METHOD_2
+void LODTile::DrawNode_FRAME(int x, int y, int dx, int dy) const
+{
+
+
+	glPushAttrib(GL_COLOR);
+	//left
+	if (m_neighbor[NV_L] == VS_ACTIVE)
+	{
+		GLVERTEX(x, y);
+		GLVERTEX(x - dx, y + dy);
+		GLVERTEX(x - dx, y);
+		GLVERTEX(x, y);
+		GLVERTEX(x - dx, y);
+		GLVERTEX(x - dx, y - dy);
+	}
+	else
+	{
+		GLVERTEX(x, y);
+		GLVERTEX(x - dx, y + dy);
+		GLVERTEX(x - dx, y - dy);
+	}
+	//down
+	if (m_neighbor[NV_D] == VS_ACTIVE)
+	{
+
+		GLVERTEX(x, y);
+		GLVERTEX(x - dx, y - dy);
+		GLVERTEX(x, y - dy);
+		GLVERTEX(x, y);
+		GLVERTEX(x, y - dy);
+		GLVERTEX(x + dx, y - dy);
+	}
+	else
+	{
+		GLVERTEX(x, y);
+		GLVERTEX(x - dx, y - dy);
+		GLVERTEX(x + dx, y - dy);
+	}
+	//right
+	if (m_neighbor[NV_R] == VS_ACTIVE)
+	{
+		GLVERTEX(x, y);
+		GLVERTEX(x + dx, y - dy);
+		GLVERTEX(x + dx, y);
+		GLVERTEX(x, y);
+		GLVERTEX(x + dx, y);
+		GLVERTEX(x + dx, y + dy);
+
+	}
+	else
+	{
+		GLVERTEX(x, y);
+		GLVERTEX(x + dx, y - dy);
+		GLVERTEX(x + dx, y + dy);
+	}
+	//up
+	if (m_neighbor[NV_U] == VS_ACTIVE)
+	{
+		GLVERTEX(x, y);
+		GLVERTEX(x, y + dy);
+		GLVERTEX(x - dx, y + dy);
+		GLVERTEX(x, y);
+		GLVERTEX(x + dx, y + dy);
+		GLVERTEX(x, y + dy);
+	}
+	else
+	{
+		GLVERTEX(x, y);
+		GLVERTEX(x + dx, x + dy);
+		GLVERTEX(x - dx, y + dy);
+	}
+}
+#endif
+#ifdef _DRAW_METHOD_3
 void LODTile::DrawNode_FRAME(int x, int y, int dx, int dy) const
 {
 
@@ -863,7 +866,7 @@ void LODTile::DrawNode_FRAME(int x, int y, int dx, int dy) const
 	GL_END();
 
 }
-
+#endif
 void LODTile::DrawPrim_FILL(int x, int z) const
 {
 
