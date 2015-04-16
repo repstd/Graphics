@@ -11,7 +11,9 @@
 #include <vector>
 #include <assert.h>
 #include "linput.h"
-
+#include "rc_common.h"
+#include "rcfactory.h"
+#include "rcmemshare.h"
 typedef TileThreadW TileThread;
 typedef TileThread* PTileThread;
 class lodImp

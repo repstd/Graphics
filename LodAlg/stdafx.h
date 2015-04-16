@@ -4,7 +4,8 @@
 
 #pragma once
 #include "targetver.h"
-
+#include <Winsock2.h>
+#include "Winuser.h"
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>

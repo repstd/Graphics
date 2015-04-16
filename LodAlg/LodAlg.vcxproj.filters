@@ -44,11 +44,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="pos.txt">
-      <Filter>Header Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="ldrawable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

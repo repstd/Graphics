@@ -13,6 +13,7 @@
 #include <osgDB/Registry>
 #include <osgDB/WriteFile>
 #include "lmanipulator.h"
+#include <typeinfo>
 #define MAX_DIS 700.0
 void saveBMP(int width, int height, int channel, BYTE* data, char* filename, int pixelFormat = GL_BGR)
 {
@@ -96,6 +97,7 @@ void quadTreeImp::drawImplementation(osg::RenderInfo& renderInfo) const
 	osg::Vec3d eye, at, up;
 	camera->getViewMatrixAsLookAt(eye, at, up, 2.0);
 	_LOG_MATRIX(camera->getViewMatrix(), "drawImplementation");
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glMatrixMode(GL_PROJECTION);
@@ -114,7 +116,6 @@ void quadTreeImp::drawImplementation(osg::RenderInfo& renderInfo) const
 #endif
 		//m_vecTile[i]->start();
 	}
-
 #ifdef _GL_MT
 	for (int i = 0; i < sz; i++)
 	{

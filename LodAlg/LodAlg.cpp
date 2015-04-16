@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "ldrawable.h"
 #include "ltiles.h"
+#include <stdlib.h>
+#include <iostream>
 #include <osgViewer/Viewer>
 #include <osgViewer/View>
 #include <osgViewer/ViewerEventHandlers>
@@ -18,9 +20,95 @@
 #include <osg/Node>
 #include <osg/BlendFunc>
 #include <OpenThreads\Thread>
+#include "rcfactory.h"
 #define _HEIGHT_FIELD_FILE_RAW "./data/terrain.raw"
 #define _HEIGHT_FIELD_FILE_SRTM "./data/srtm_ramp2_world_5400x2700_2.jpg"
 #define _HEIGHT_FIELD_FILE_PUGET_ASC "E://1.MyDocuments//LOD//MSR_Hoppe_PM//psdem_2005//psdem//psdem_2005.asc"
+rcpipeServer* g_pipeServer;
+OVERLAPPED g_oOverlap;
+rcFileMapWriter*  g_writer;
+rcFileMapReader*  g_reader;
+	//initMemShareWriter();
+	//@yulw,pipe-test,2015-4-5
+	//writeToMemShare(camera->getViewMatrix(), 64);
+	//readFromMemShareAndSyncMatrix(camera.get());
+
+void initPipeServer()
+{
+	g_pipeServer = new rcpipeServer(_RC_PIPE_NAME);
+	HANDLE hEvent = CreateEvent(
+		NULL,    // default security attribute 
+		TRUE,    // manual-reset event 
+		TRUE,    // initial state = signaled 
+		NULL);   // unnamed event object 
+	if (hEvent == NULL)
+	{
+		printf("CreateEvent failed with %d.\n", GetLastError());
+	}
+	g_oOverlap.hEvent = hEvent;
+
+}
+void writeToPipe(void* data, DWORD sizeToWrite)
+{
+	DWORD sizeWritten=-1;
+	if (g_pipeServer->getHandle() != NULL)
+	{
+		g_pipeServer->writeto(data, sizeToWrite, sizeWritten, &g_oOverlap);
+	}
+}
+void initMemShareWriter()
+{
+	//char* name ="Master";
+	char* name = "MemShare";
+	char* info = "initMemShareWriter";
+	printf("%s\n", info);
+	g_writer = rcfactory::instance()->createFileMapWriter(name);
+}
+void initMemShareReader()
+{
+	//char* name = "Slave";
+	//char* name = "Slave";
+	char* name = "MemShare";
+	char* info = "initMemShareReader";
+	printf("%s\n", info);
+	g_reader = rcfactory::instance()->createFileMapReader(name);
+}
+
+void encodeMsg(osg::ref_ptr<osgViewer::Viewer> viewer, void* msg)
+{
+	osg::Matrix modelview(viewer->getCamera()->getViewMatrix());
+	osg::Matrix projection(viewer->getCamera()->getProjectionMatrix());
+	osg::Matrix maniMatrix(viewer->getCameraManipulator()->getMatrix());
+	SYNC_OSG_MSG* pMsg = reinterpret_cast<SYNC_OSG_MSG*>(msg);
+	pMsg->_eventSize = 0;
+	memcpy(pMsg->_matrix, maniMatrix.ptr(), 16 * sizeof(double));
+	memcpy(pMsg->_modelView, modelview.ptr(), 16 * sizeof(double));
+	memcpy(pMsg->_projection, projection.ptr(), 16 * sizeof(double));
+}
+void decodeMsg(osgViewer::Viewer* viewer, void *msg)
+{
+	SYNC_OSG_MSG* pMsg = reinterpret_cast<SYNC_OSG_MSG*>(msg);
+	osg::Matrix modelView(pMsg->_modelView);
+	osg::Matrix projection(pMsg->_projection);
+	osg::Matrix mani(pMsg->_matrix);
+	viewer->getCamera()->setViewMatrix(modelView);
+	viewer->getCamera()->setProjectionMatrix(projection);
+	viewer->getCameraManipulator()->setByMatrix(mani);
+}
+void writeToMemShare(osgViewer::Viewer* viewer)
+{
+	SYNC_OSG_MSG msg;
+	encodeMsg(viewer, &msg);
+	g_writer->write(&msg, _MAX_OSG_DATA_SIZE);
+}
+char buf[_MAX_OSG_DATA_SIZE];
+
+void readFromMemShareAndSyncMatrix(osgViewer::Viewer* viewer)
+{
+	g_reader->read(buf, sizeof(SYNC_OSG_MSG));
+	decodeMsg(viewer, buf);
+}
+
 class camDrawcallback :public osg::Drawable::DrawCallback
 {
 
@@ -72,27 +160,26 @@ protected:
 
 	}
 };
-
-
 int _tmain(int argc, _TCHAR* argv[])
 {
-
-	osgViewer::Viewer viewer;
-
-
-	viewer.setUpViewInWindow(50, 50, 1280, 720);
-
-	viewer.setThreadingModel(osgViewer::Viewer::SingleThreaded);
-	
-	viewer.realize();
+//#undef __MASTER
+#ifdef __MASTER
+	initMemShareWriter();
+#else
+	initMemShareReader();
+#endif
+	osg::ref_ptr<osgViewer::Viewer> viewer=new osgViewer::Viewer;
+	viewer->setUpViewInWindow(50, 50, 1280, 720);
+	viewer->realize();
+	viewer->setThreadingModel(osgViewer::Viewer::SingleThreaded);
 	osg::Matrixd cameraRotation;
 	cameraRotation.makeRotate(osg::DegreesToRadians(180.0), osg::Z_AXIS);
-	viewer.getCamera()->getGraphicsContext()->makeCurrent();
-	viewer.setDataVariance(osg::Object::DYNAMIC);
+	viewer->getCamera()->getGraphicsContext()->makeCurrent();
+	viewer->setDataVariance(osg::Object::DYNAMIC);
 	
-	//std::unique_ptr<dataImp> rawdata(dataImpFactory::instance()->createRawImp(_HEIGHT_FIELD_FILE_RAW));
-	std::unique_ptr<dataImp> gdaldata(dataImpFactory::instance()->createGDALImp(_HEIGHT_FIELD_FILE_SRTM, "GeoTiff"));
-	std::unique_ptr<heightField> input(new heightField(gdaldata.release()));
+	std::unique_ptr<dataImp> rawdata(dataImpFactory::instance()->createRawImp(_HEIGHT_FIELD_FILE_RAW));
+	//std::unique_ptr<dataImp> gdaldata(dataImpFactory::instance()->createGDALImp(_HEIGHT_FIELD_FILE_SRTM, "GeoTiff"));
+	std::unique_ptr<heightField> input(new heightField(rawdata.release()));
 	LODDrawable* lod = new LODDrawable(lodImpFactory::instance()->createQuadTreeImp());
 	lod->init(input.release());
 	//lod->init(_HEIGHT_FIELD_FILE_RAW);
@@ -116,14 +203,27 @@ int _tmain(int argc, _TCHAR* argv[])
 	manipulator->setByMatrix(vm);
 
 	//manipulator->setUserData(lod);
-	viewer.setCameraManipulator(manipulator);
-	viewer.getCamera()->setCullingMode(osg::CullSettings::FAR_PLANE_CULLING);
-	viewer.setSceneData(geode);
-	viewer.setRunMaxFrameRate(90);
-	viewer.addEventHandler(new  osgViewer::StatsHandler);
-	viewer.addEventHandler(new  osgViewer::WindowSizeHandler);
-	viewer.addEventHandler(new  osgViewer::HelpHandler);
-	osg::setNotifyHandler(new errorHandler);
-	return viewer.run();
+	viewer->setCameraManipulator(manipulator);
+	viewer->getCamera()->setCullingMode(osg::CullSettings::FAR_PLANE_CULLING);
+	viewer->setSceneData(geode);
+	viewer->setRunMaxFrameRate(90);
+	viewer->addEventHandler(new  osgViewer::StatsHandler);
+	viewer->addEventHandler(new  osgViewer::WindowSizeHandler);
+	viewer->addEventHandler(new  osgViewer::HelpHandler);
+	//osg::setNotifyHandler(new errorHandler);
+	while (!viewer->done())
+	{
+		viewer->advance();
+#ifdef __MASTER
+		writeToMemShare(viewer);
+#else
+		readFromMemShareAndSyncMatrix(viewer);
+#endif
+		viewer->frame();
+		viewer->eventTraversal();
+		viewer->updateTraversal();
+		viewer->renderingTraversals();
+	}
+	return 0;
 }
 

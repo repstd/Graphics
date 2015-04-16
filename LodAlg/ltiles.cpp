@@ -5,6 +5,7 @@
 #include <list>
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
 #include <gdal.h>
 #include <gdal_alg.h>
 #include <gdal_priv.h>
@@ -24,13 +25,20 @@
 #define GL_BEGIN(status)
 #define GL_END() glEnd()
 #endif
+#include <exception>
 VAO::VAO()
 {
+	GLuint index[2];
 
-	glGenBuffers(1, &m_vbo);
-
-	glGenBuffers(1, &m_ibo);
-
+	glGenBuffers(2, index);
+	m_vbo = index[0];
+	try {
+		m_ibo = index[1];
+	}
+	catch (std::exception& e)
+	{
+		printf("VAO Exception: %d\n", e.what());
+	}
 	glGenVertexArrays(1, &m_vao);
 }
 VAO::~VAO()
