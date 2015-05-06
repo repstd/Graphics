@@ -824,7 +824,59 @@ void LODTile::DrawNode_FRAME(int x, int y, int dx, int dy) const
 	}
 }
 #endif
+
 #ifdef _DRAW_METHOD_3
+void LODTile::DrawNode_FRAME(int x, int y, int dx, int dy) const
+{
+
+	GL_BEGIN(GL_TRIANGLE_FAN);
+	GLVERTEX(x, y);
+	GLVERTEX(x - dx, y + dy);
+	GLVERTEX(x - dx, y - dy);
+	GL_END();
+	if (m_neighbor[NV_L] == VS_ACTIVE)
+	{
+		GLVERTEX(x - dx, y);
+		GLVERTEX(x - dx, y + dy);
+		GLVERTEX(x - dx, y - dy);
+	}
+	GL_BEGIN(GL_TRIANGLE_FAN);
+	GLVERTEX(x, y);
+	GLVERTEX(x - dx, y - dy);
+	GLVERTEX(x + dx, y - dy);
+	GL_END();
+
+	if (m_neighbor[NV_D] == VS_ACTIVE)
+	{
+		GLVERTEX(x, y - dy);
+		GLVERTEX(x - dx, y - dy);
+		GLVERTEX(x + dx, y - dy);
+	}
+	GL_BEGIN(GL_TRIANGLE_FAN);
+	GLVERTEX(x, y);
+	GLVERTEX(x + dx, y - dy);
+	GLVERTEX(x + dx, y + dy);
+	GL_END();
+	if (m_neighbor[NV_R] == VS_ACTIVE)
+	{
+		GLVERTEX(x, y);
+		GLVERTEX(x + dx, y - dy);
+		GLVERTEX(x + dx, y + dy);
+	}
+	GL_BEGIN(GL_TRIANGLE_FAN);
+	GLVERTEX(x, y);
+	GLVERTEX(x + dx, y + dy);
+	GLVERTEX(x - dx, y + dy);
+	{
+		GLVERTEX(x, y);
+		GLVERTEX(x - dx, y + dy);
+		GLVERTEX(x + dx, y + dy);
+	}
+	GL_END();
+
+}
+#endif
+#ifdef _DRAW_METHOD_4
 void LODTile::DrawNode_FRAME(int x, int y, int dx, int dy) const
 {
 
