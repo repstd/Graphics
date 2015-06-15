@@ -1,0 +1,288 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.6	//
+APPLY_COLOR	.\ltiles.cpp	644;"	d	file:
+BFSRender	.\lthreads.cpp	/^void TileThreadW::BFSRender() const$/;"	f	class:TileThreadW
+BFSRender	.\lthreads.h	/^	void BFSRender() const$/;"	f	class:TileThreadP
+BFSRender	.\ltiles.cpp	/^void LODTile::BFSRender() const$/;"	f	class:LODTile
+CMatrix	.\Matrix.h	/^	CMatrix() :_width(0), _height(0), data(NULL){}$/;"	f	class:CMatrix
+CMatrix	.\Matrix.h	/^class CMatrix$/;"	c
+CalculateDHMatrix	.\ltiles.cpp	/^void LODTile::CalculateDHMatrix()$/;"	f	class:LODTile
+CanActive	.\ltiles.cpp	/^unsigned char LODTile::CanActive(int x, int y, int patchSizeX, int patchSizeY) const$/;"	f	class:LODTile
+CheckNeighbor	.\ltiles.cpp	/^void LODTile::CheckNeighbor(int cx, int cy, int dx, int dy) const$/;"	f	class:LODTile
+DEBUG_ENCODE_MSG	.\ltiles.cpp	17;"	d	file:
+DEBUG_LOG_INIT	.\ltiles.cpp	16;"	d	file:
+DisableNode	.\ltiles.cpp	/^void LODTile::DisableNode(int cx, int cy, int dx, int dy) const$/;"	f	class:LODTile
+DividNode	.\ltiles.cpp	/^void LODTile::DividNode(int cx, int cy, int dx, int dy) const$/;"	f	class:LODTile
+DrawIndexedPrimitive	.\lthreads.h	/^	void DrawIndexedPrimitive() const$/;"	f	class:TileThreadW
+DrawIndexedPrimitive	.\ltiles.cpp	/^void LODTile::DrawIndexedPrimitive() const$/;"	f	class:LODTile
+DrawNode	.\ltiles.cpp	/^void LODTile::DrawNode(int cx, int cy, int d, int dy) const$/;"	f	class:LODTile
+DrawNode_FILL	.\ltiles.cpp	/^void LODTile::DrawNode_FILL(int x, int z, int d, int dy) const$/;"	f	class:LODTile
+DrawNode_FRAME	.\ltiles.cpp	/^void LODTile::DrawNode_FRAME(int x, int z, int dx, int dy) const$/;"	f	class:LODTile
+DrawPrim	.\ltiles.cpp	/^void LODTile::DrawPrim(int cx, int cy) const$/;"	f	class:LODTile
+DrawPrim_FILL	.\ltiles.cpp	/^void LODTile::DrawPrim_FILL(int x, int z) const$/;"	f	class:LODTile
+DrawPrim_FRAME	.\ltiles.cpp	/^void LODTile::DrawPrim_FRAME(int x, int z) const$/;"	f	class:LODTile
+EventLoop	.\lthreads.cpp	/^void TileThreadW::EventLoop(void * para)$/;"	f	class:TileThreadW
+GLVERTEX	.\ltiles.cpp	/^inline void LODTile::GLVERTEX(int x, int y) const$/;"	f	class:LODTile
+GL_BEGIN	.\ltiles.cpp	20;"	d	file:
+GL_BEGIN	.\ltiles.cpp	23;"	d	file:
+GL_END	.\ltiles.cpp	21;"	d	file:
+GL_END	.\ltiles.cpp	24;"	d	file:
+GetAveHeight	.\ltiles.cpp	/^float LODTile::GetAveHeight(float x, float y) const$/;"	f	class:LODTile
+GetHeight	.\ltiles.cpp	/^int  LODTile::GetHeight(int x, int y) const$/;"	f	class:LODTile
+LNODE	.\ltiles.h	/^} LNODE;$/;"	t	typeref:struct:_NODE
+LODDrawable	.\ldrawable.cpp	/^LODDrawable::LODDrawable()$/;"	f	class:LODDrawable
+LODDrawable	.\ldrawable.h	/^	LODDrawable(const LODDrawable& drawable, const osg::CopyOp    &copyop = osg::CopyOp::SHALLOW_COPY) $/;"	f	class:LODDrawable
+LODDrawable	.\ldrawable.h	/^class LODDrawable :public osg::Drawable$/;"	c
+LODTile	.\ltiles.cpp	/^LODTile::LODTile()$/;"	f	class:LODTile
+LODTile	.\ltiles.h	/^class LODTile$/;"	c
+MAX_DIS	.\ldrawable.cpp	16;"	d	file:
+MAX_DIS	.\ltiles.cpp	13;"	d	file:
+Manipulator	.\lmanipulator.cpp	/^Manipulator::Manipulator(LODDrawable* lod)$/;"	f	class:Manipulator
+Manipulator	.\lmanipulator.h	/^class Manipulator : $/;"	c
+NEIGHBOR	.\ltiles.h	/^enum NEIGHBOR$/;"	g
+NV_D	.\ltiles.h	/^	NV_D,$/;"	e	enum:NEIGHBOR
+NV_L	.\ltiles.h	/^	NV_L = 0,$/;"	e	enum:NEIGHBOR
+NV_R	.\ltiles.h	/^	NV_R$/;"	e	enum:NEIGHBOR
+NV_U	.\ltiles.h	/^	NV_U,$/;"	e	enum:NEIGHBOR
+NodeCanDivid	.\ltiles.cpp	/^BOOL LODTile::NodeCanDivid(int cx, int cy, int d, int dy) const$/;"	f	class:LODTile
+PTileThread	.\ldrawable.h	/^typedef TileThread* PTileThread;$/;"	t
+PatchSize	.\ltiles.h	/^} PatchSize;$/;"	t	typeref:struct:_PatchSize
+Range	.\ltiles.h	/^} Range;$/;"	t	typeref:struct:_Range
+Reset	.\Matrix.h	/^	void Reset(int w, int h) const$/;"	f	class:CMatrix
+STATUS	.\ltiles.h	/^enum STATUS$/;"	g
+SetData	.\Matrix.h	/^	void SetData(T *pData)$/;"	f	class:CMatrix
+SetData	.\Matrix.h	/^	void SetData(T *pData,int srcOffsetX,int srcOffsetY,int srcWidth,int SrcHeight,int dstWidth,int dstHeight)$/;"	f	class:CMatrix
+TILETHREAD_status	.\lthreads.h	/^	enum TILETHREAD_status$/;"	g	class:TileThreadW
+TTH_ENDED	.\lthreads.h	/^		TTH_ENDED$/;"	e	enum:TileThreadW::TILETHREAD_status
+TTH_NREADY	.\lthreads.h	/^		TTH_NREADY,$/;"	e	enum:TileThreadW::TILETHREAD_status
+TTH_RUNNING	.\lthreads.h	/^		TTH_RUNNING,$/;"	e	enum:TileThreadW::TILETHREAD_status
+TileThread	.\ldrawable.h	/^typedef TileThreadW TileThread;$/;"	t
+TileThread	.\lthreads.h	8;"	d
+TileThreadP	.\lthreads.h	/^	TileThreadP() :$/;"	f	class:TileThreadP
+TileThreadP	.\lthreads.h	/^class TileThreadP :$/;"	c
+TileThreadW	.\lthreads.cpp	/^TileThreadW::TileThreadW()$/;"	f	class:TileThreadW
+TileThreadW	.\lthreads.h	/^class TileThreadW$/;"	c
+VAO	.\ltiles.cpp	/^VAO::VAO()$/;"	f	class:VAO
+VAO	.\ltiles.h	/^class VAO$/;"	c
+VECTOR	.\ltiles.h	/^typedef _VECTOR<float> VECTOR;$/;"	t
+VS_ACTIVE	.\ltiles.h	/^	VS_ACTIVE = 0x01,$/;"	e	enum:STATUS
+VS_CULLED	.\ltiles.h	/^	VS_CULLED = 0x02,$/;"	e	enum:STATUS
+VS_DISABLE	.\ltiles.h	/^	VS_DISABLE = 0x00,$/;"	e	enum:STATUS
+VS_STOPED	.\ltiles.h	/^	VS_STOPED = 0x04,$/;"	e	enum:STATUS
+VS_UNREACH	.\ltiles.h	/^	VS_UNREACH = 0x08$/;"	e	enum:STATUS
+_DEBUG_ENCODE_MSG	.\stdafx.h	23;"	d
+_DEBUG_ENCODE_MSG_MANI	.\lmanipulator.h	6;"	d
+_DEBUG_FILENAME_	.\ltiles.cpp	15;"	d	file:
+_DEBUG_LOG_FILENAME_MANI	.\lmanipulator.h	4;"	d
+_DEBUG_LOG_INIT	.\stdafx.h	32;"	d
+_DEBUG_LOG_INIT_MANI	.\lmanipulator.h	5;"	d
+_GDAL_SUPPORTED	.\linput.h	/^		_GDAL_SUPPORTED$/;"	e	enum:dataImpFactory::_data_type
+_HEIGHT_FIELD_FILE_PUGET_ASC	.\lodalg.cpp	23;"	d	file:
+_HEIGHT_FIELD_FILE_RAW	.\lodalg.cpp	21;"	d	file:
+_HEIGHT_FIELD_FILE_SRTM	.\lodalg.cpp	22;"	d	file:
+_LOD_ERROR	.\stdafx.h	/^	_LOD_ERROR =0x1000,$/;"	e	enum:_LOD_STATUS
+_LOD_STATUS	.\stdafx.h	/^enum _LOD_STATUS$/;"	g
+_LOD_SUCCESS	.\stdafx.h	/^	_LOD_SUCCESS = 0x0100$/;"	e	enum:_LOD_STATUS
+_LOG_MATRIX	.\lmanipulator.h	10;"	d
+_MAT_FMT	.\lmanipulator.h	8;"	d
+_MAT_ROW	.\lmanipulator.h	9;"	d
+_N	.\ltiles.h	/^	int _N;$/;"	m	struct:_Range
+_NODE	.\ltiles.h	/^	_NODE()$/;"	f	struct:_NODE
+_NODE	.\ltiles.h	/^	_NODE(int x, int y, int l)$/;"	f	struct:_NODE
+_NODE	.\ltiles.h	/^typedef struct _NODE$/;"	s
+_PatchSize	.\ltiles.h	/^	_PatchSize()$/;"	f	struct:_PatchSize
+_PatchSize	.\ltiles.h	/^typedef struct _PatchSize$/;"	s
+_RAW	.\linput.h	/^		_RAW,$/;"	e	enum:dataImpFactory::_data_type
+_Range	.\ltiles.h	/^typedef struct _Range$/;"	s
+_VECTOR	.\ltiles.h	/^	_VECTOR()$/;"	f	struct:_VECTOR
+_VECTOR	.\ltiles.h	/^	_VECTOR(T x, T y, T z)$/;"	f	struct:_VECTOR
+_VECTOR	.\ltiles.h	/^struct _VECTOR$/;"	s
+__MATRIX_H__	.\Matrix.h	2;"	d
+_centerX	.\ltiles.h	/^	int _centerX, _centerY;$/;"	m	struct:_Range
+_centerY	.\ltiles.h	/^	int _centerX, _centerY;$/;"	m	struct:_Range
+_channel	.\linput.h	/^	int _channel;$/;"	m	struct:_extent
+_data_type	.\linput.h	/^	enum _data_type$/;"	g	class:dataImpFactory
+_extent	.\linput.h	/^typedef struct _extent$/;"	s
+_height	.\Matrix.h	/^	mutable int _width, _height;$/;"	m	class:CMatrix
+_height	.\linput.h	/^	int _height;$/;"	m	struct:_extent
+_height	.\ltiles.h	/^	int _width, _height;$/;"	m	struct:_Range
+_index_i	.\ltiles.h	/^	int _index_i, _index_j;$/;"	m	struct:_Range
+_index_j	.\ltiles.h	/^	int _index_i, _index_j;$/;"	m	struct:_Range
+_lod	.\ltiles.h	/^	int _lod;$/;"	m	struct:_NODE
+_tmain	.\lodalg.cpp	/^int _tmain(int argc, _TCHAR* argv[])$/;"	f
+_width	.\Matrix.h	/^	mutable int _width, _height;$/;"	m	class:CMatrix
+_width	.\linput.h	/^	int _width;$/;"	m	struct:_extent
+_width	.\ltiles.h	/^	int _width, _height;$/;"	m	struct:_Range
+_x	.\ltiles.h	/^	int _x, _y;$/;"	m	struct:_NODE
+_x	.\ltiles.h	/^	int _x, _y;$/;"	m	struct:_PatchSize
+_x	.\ltiles.h	/^	mutable T _x, _y, _z;$/;"	m	struct:_VECTOR
+_y	.\ltiles.h	/^	int _x, _y;$/;"	m	struct:_NODE
+_y	.\ltiles.h	/^	int _x, _y;$/;"	m	struct:_PatchSize
+_y	.\ltiles.h	/^	mutable T _x, _y, _z;$/;"	m	struct:_VECTOR
+_z	.\ltiles.h	/^	mutable T _x, _y, _z;$/;"	m	struct:_VECTOR
+camDrawcallback	.\lodalg.cpp	/^	camDrawcallback()$/;"	f	class:camDrawcallback
+camDrawcallback	.\lodalg.cpp	/^	camDrawcallback(const osg::Drawable::DrawCallback & cb, const osg::CopyOp& co)$/;"	f	class:camDrawcallback
+camDrawcallback	.\lodalg.cpp	/^class camDrawcallback :public osg::Drawable::DrawCallback$/;"	c	file:
+clip	.\linput.cpp	/^void gdalData::clip()$/;"	f	class:gdalData
+clip	.\linput.cpp	/^void gdalDataProxy::clip()$/;"	f	class:gdalDataProxy
+create	.\linput.cpp	/^dataImp* dataImpFactory::create(int type, const char* filename, const char* driverName)$/;"	f	class:dataImpFactory
+createGDALImp	.\linput.cpp	/^dataImp* dataImpFactory::createGDALImp(const char* filename, const char* driverName)$/;"	f	class:dataImpFactory
+createRawImp	.\linput.cpp	/^dataImp* dataImpFactory::createRawImp(const char* filename)$/;"	f	class:dataImpFactory
+data	.\Matrix.h	/^	mutable T * data;$/;"	m	class:CMatrix
+dataImp	.\linput.h	/^	dataImp() { return; }$/;"	f	class:dataImp
+dataImp	.\linput.h	/^class dataImp$/;"	c
+dataImpFactory	.\linput.h	/^	dataImpFactory(){ return; }$/;"	f	class:dataImpFactory
+dataImpFactory	.\linput.h	/^class dataImpFactory$/;"	c
+draw	.\ltiles.cpp	/^void VAO::draw(int startIndex, int num)$/;"	f	class:VAO
+drawImplementation	.\ldrawable.cpp	/^void LODDrawable::drawImplementation(osg::RenderInfo& renderInfo) const$/;"	f	class:LODDrawable
+drawImplementation	.\lodalg.cpp	/^	virtual void drawImplementation(osg::RenderInfo& \/*renderInfo*\/ renderinfo, const osg::Drawable* \/*drawable*\/) const $/;"	f	class:camDrawcallback
+errorHandler	.\lodalg.cpp	/^	errorHandler()$/;"	f	class:errorHandler
+errorHandler	.\lodalg.cpp	/^	errorHandler(const std::string& filename)$/;"	f	class:errorHandler
+errorHandler	.\lodalg.cpp	/^class errorHandler : public osg::NotifyHandler$/;"	c	file:
+extent	.\linput.h	/^} extent;$/;"	t	typeref:struct:_extent
+gdalData	.\linput.cpp	/^gdalData::gdalData() :dataImp()$/;"	f	class:gdalData
+gdalData	.\linput.h	/^class gdalData :public dataImp$/;"	c
+gdalDataProxy	.\linput.cpp	/^gdalDataProxy::gdalDataProxy() :dataImp()$/;"	f	class:gdalDataProxy
+gdalDataProxy	.\linput.h	/^class gdalDataProxy :public dataImp$/;"	c
+generateTile	.\linput.cpp	/^void heightField::generateTile(int i, int j, int N, BYTE* dst, Range& tileRange)$/;"	f	class:heightField
+getCenterX	.\linput.cpp	/^int heightField::getCenterX()$/;"	f	class:heightField
+getCenterY	.\linput.cpp	/^int heightField::getCenterY()$/;"	f	class:heightField
+getChannel	.\linput.cpp	/^int heightField::getChannel()$/;"	f	class:heightField
+getCross	.\ltiles.h	/^	_VECTOR getCross(const _VECTOR& n)const$/;"	f	struct:_VECTOR
+getDrivername	.\linput.cpp	/^const char* gdalDataProxy::getDrivername()$/;"	f	class:gdalDataProxy
+getExtent	.\linput.cpp	/^extent  rawDataProxy::getExtent()$/;"	f	class:rawDataProxy
+getExtent	.\linput.cpp	/^extent gdalData::getExtent()$/;"	f	class:gdalData
+getExtent	.\linput.cpp	/^extent gdalDataProxy::getExtent()$/;"	f	class:gdalDataProxy
+getExtent	.\linput.cpp	/^extent rawData::getExtent()$/;"	f	class:rawData
+getExtent	.\linput.cpp	/^void	rawDataProxy::getExtent(extent& extent)$/;"	f	class:rawDataProxy
+getExtent	.\linput.cpp	/^void gdalData::getExtent(extent& extent)$/;"	f	class:gdalData
+getExtent	.\linput.cpp	/^void gdalDataProxy::getExtent(extent& extent)$/;"	f	class:gdalDataProxy
+getExtent	.\linput.cpp	/^void rawData::getExtent(extent& extent)$/;"	f	class:rawData
+getFieldHeight	.\ldrawable.cpp	/^int LODDrawable::getFieldHeight(int index, int x, int y)$/;"	f	class:LODDrawable
+getFilename	.\linput.cpp	/^const char*   rawDataProxy::getFilename()$/;"	f	class:rawDataProxy
+getFilename	.\linput.cpp	/^const char* gdalDataProxy::getFilename()$/;"	f	class:gdalDataProxy
+getHeight	.\linput.cpp	/^int heightField::getHeight()$/;"	f	class:heightField
+getHeight	.\lthreads.cpp	/^int TileThreadW::getHeight(int x, int y)$/;"	f	class:TileThreadW
+getHeight	.\lthreads.h	/^	int getHeight(int x, int y)$/;"	f	class:TileThreadP
+getImp	.\linput.cpp	/^dataImp* heightField::getImp()$/;"	f	class:heightField
+getInputData	.\linput.cpp	/^gdalData* gdalDataProxy::getInputData()$/;"	f	class:gdalDataProxy
+getInputData	.\linput.cpp	/^rawData* rawDataProxy::getInputData()$/;"	f	class:rawDataProxy
+getLOD	.\ltiles.h	/^	int getLOD()$/;"	f	struct:_NODE
+getLODRange	.\ldrawable.cpp	/^Range LODDrawable::getLODRange()$/;"	f	class:LODDrawable
+getNormal	.\ltiles.cpp	/^VECTOR LODTile::getNormal(int x, int y, int dx, int dy) const$/;"	f	class:LODTile
+getStatus	.\lthreads.cpp	/^int TileThreadW::getStatus()$/;"	f	class:TileThreadW
+getTile	.\linput.cpp	/^void	rawDataProxy::getTile(BYTE* src, BYTE* dst, int row, int col, int N)$/;"	f	class:rawDataProxy
+getTile	.\linput.cpp	/^void gdalData::getTile(BYTE* src, BYTE* dst, int row, int col, int N)$/;"	f	class:gdalData
+getTile	.\linput.cpp	/^void gdalDataProxy::getTile(BYTE* dst, int row, int col, int N)$/;"	f	class:gdalDataProxy
+getTile	.\linput.cpp	/^void gdalDataProxy::getTile(BYTE* src, BYTE* dst, int row, int col, int N)$/;"	f	class:gdalDataProxy
+getTile	.\linput.cpp	/^void rawData::getTile(BYTE* src, BYTE* dst, int row, int col, int N)$/;"	f	class:rawData
+getTile	.\linput.cpp	/^void rawDataProxy::getTile(BYTE* dst, int row, int col, int N)$/;"	f	class:rawDataProxy
+getTile	.\linput.h	/^	virtual void getTile(BYTE*, int, int, int){ return; }$/;"	f	class:dataImp
+getTileCenterX	.\linput.cpp	/^int heightField::getTileCenterX(int i, int j, int N)$/;"	f	class:heightField
+getTileCenterY	.\linput.cpp	/^int heightField::getTileCenterY(int i, int j, int N)$/;"	f	class:heightField
+getTileHeight	.\linput.cpp	/^int heightField::getTileHeight(int i, int j, int N)$/;"	f	class:heightField
+getTileWidth	.\linput.cpp	/^int heightField::getTileWidth(int i, int j, int N)$/;"	f	class:heightField
+getWidth	.\linput.cpp	/^int heightField::getWidth()$/;"	f	class:heightField
+handle	.\lmanipulator.cpp	/^bool Manipulator::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& us)$/;"	f	class:Manipulator
+heightField	.\linput.cpp	/^heightField::heightField(dataImp* input)$/;"	f	class:heightField
+heightField	.\linput.h	/^class heightField$/;"	c
+init	.\ldrawable.cpp	/^void LODDrawable::init(const char* filename)$/;"	f	class:LODDrawable
+init	.\ldrawable.cpp	/^void LODDrawable::init(heightField* input)$/;"	f	class:LODDrawable
+init	.\lthreads.cpp	/^void TileThreadW::init(BYTE* heightMat, const Range globalRange, const Range localRange)$/;"	f	class:TileThreadW
+init	.\lthreads.h	/^	void init(BYTE* heightMat, const Range globalRange, const Range localRange)$/;"	f	class:TileThreadP
+init	.\ltiles.cpp	/^void LODTile::init(BYTE* heightMat, const Range globalRange, const Range localRange)$/;"	f	class:LODTile
+initParams	.\ltiles.cpp	/^void LODTile::initParams()$/;"	f	class:LODTile
+initVertex	.\ltiles.cpp	/^void VAO::initVertex(const BYTE* heightMap, int offset_col\/*offset in x brought by tile generation.*\/, int offset_row, Range rlocal, Range rglobal, int offset_x, int offset_y, int offset_z )$/;"	f	class:VAO
+initVertex	.\ltiles.cpp	/^void VAO::initVertex(const BYTE* heightMap, int row_offset, int col_offset, int w, int h, int offset_x, int offset_y, int offset_z)$/;"	f	class:VAO
+initVertex	.\ltiles.cpp	/^void VAO::initVertex(const float* vertexs)$/;"	f	class:VAO
+instance	.\linput.cpp	/^dataImpFactory* dataImpFactory::instance()$/;"	f	class:dataImpFactory
+isRunning	.\lthreads.cpp	/^const bool TileThreadW::isRunning()$/;"	f	class:TileThreadW
+length	.\ltiles.h	/^	T length()$/;"	f	struct:_VECTOR
+load	.\linput.cpp	/^void	rawDataProxy::load(const char* filename, const char* driverName)$/;"	f	class:rawDataProxy
+load	.\linput.cpp	/^void gdalData::load(const char* filename, const char* driverName)$/;"	f	class:gdalData
+load	.\linput.cpp	/^void gdalDataProxy::load(const char* filename, const char* driverName)$/;"	f	class:gdalDataProxy
+load	.\linput.cpp	/^void rawData::load(const char* filename, const char* driverName)$/;"	f	class:rawData
+local2Global	.\ltiles.cpp	/^inline void LODTile::local2Global(int& x, int& y, int& z) const$/;"	f	class:LODTile
+m_DHMatrix	.\ltiles.h	/^	CMatrix<float> m_DHMatrix;$/;"	m	class:LODTile
+m_HMMatrix	.\ltiles.h	/^	CMatrix<BYTE> m_HMMatrix;$/;"	m	class:LODTile
+m_LOD	.\lmanipulator.h	/^	LODDrawable* m_LOD;$/;"	m	class:Manipulator
+m_LodMatrix	.\ltiles.h	/^	CMatrix<BYTE>    m_LodMatrix;$/;"	m	class:LODTile
+m_ViewX	.\ltiles.h	/^	mutable float m_ViewX, m_ViewY, m_ViewZ;$/;"	m	class:LODTile
+m_ViewY	.\ltiles.h	/^	mutable float m_ViewX, m_ViewY, m_ViewZ;$/;"	m	class:LODTile
+m_ViewZ	.\ltiles.h	/^	mutable float m_ViewX, m_ViewY, m_ViewZ;$/;"	m	class:LODTile
+m_dataInputImp	.\linput.h	/^	std::unique_ptr<dataImp> m_dataInputImp;$/;"	m	class:heightField
+m_delta	.\ltiles.h	/^	PatchSize   m_delta[30];$/;"	m	class:LODTile
+m_driver	.\linput.h	/^	std::unique_ptr<GDALDriver> m_driver;$/;"	m	class:gdalDataProxy
+m_driverName	.\linput.h	/^	std::string m_driverName;$/;"	m	class:gdalDataProxy
+m_fC	.\ltiles.h	/^	float m_fC;$/;"	m	class:LODTile
+m_fScale	.\ltiles.h	/^	float         m_fScale;$/;"	m	class:LODTile
+m_fc	.\ltiles.h	/^	float m_fc;$/;"	m	class:LODTile
+m_filename	.\linput.h	/^	std::string m_filename;$/;"	m	class:gdalDataProxy
+m_filename	.\linput.h	/^	std::string m_filename;$/;"	m	class:rawDataProxy
+m_gdalData	.\linput.h	/^	std::unique_ptr<gdalData> m_gdalData;$/;"	m	class:gdalDataProxy
+m_hThread	.\lthreads.h	/^	mutable HANDLE m_hThread;$/;"	m	class:TileThreadW
+m_iHeight	.\linput.h	/^	int m_iWidth, m_iHeight;$/;"	m	class:rawData
+m_iRasterCnts	.\linput.h	/^	int m_iRasterCnts;$/;"	m	class:gdalData
+m_iRasterHeight	.\linput.h	/^	int m_iRasterWidth, m_iRasterHeight;$/;"	m	class:gdalData
+m_iRasterWidth	.\linput.h	/^	int m_iRasterWidth, m_iRasterHeight;$/;"	m	class:gdalData
+m_iSize	.\linput.h	/^	LONG m_iSize;$/;"	m	class:gdalData
+m_iSize	.\linput.h	/^	LONG m_iSize;$/;"	m	class:rawData
+m_iWidth	.\linput.h	/^	int m_iWidth, m_iHeight;$/;"	m	class:rawData
+m_ibo	.\ltiles.h	/^	GLuint m_ibo, m_vbo;$/;"	m	class:VAO
+m_index	.\ltiles.h	/^	GLuint* m_index;$/;"	m	class:VAO
+m_indexBuf	.\ltiles.h	/^	mutable std::vector<UINT> m_indexBuf;$/;"	m	class:LODTile
+m_neighbor	.\ltiles.h	/^	mutable int   m_neighbor[4];$/;"	m	class:LODTile
+m_pTile	.\lthreads.h	/^	mutable LODTile m_pTile;$/;"	m	class:TileThreadP
+m_pTile	.\lthreads.h	/^	mutable LODTile m_pTile;$/;"	m	class:TileThreadW
+m_posX	.\lmanipulator.h	/^	int m_posX;$/;"	m	class:Manipulator
+m_posY	.\lmanipulator.h	/^	int m_posY;$/;"	m	class:Manipulator
+m_posZ	.\lmanipulator.h	/^	int m_posZ;$/;"	m	class:Manipulator
+m_rawData	.\linput.h	/^	std::unique_ptr<rawData> m_rawData;$/;"	m	class:rawDataProxy
+m_rglobalPara	.\ldrawable.h	/^	Range m_rglobalPara;$/;"	m	class:LODDrawable
+m_rglobalPara	.\ltiles.h	/^	Range m_rglobalPara;$/;"	m	class:LODTile
+m_rlocalPara	.\ltiles.h	/^	Range m_rlocalPara;$/;"	m	class:LODTile
+m_status	.\lthreads.cpp	/^static int m_status = -1;$/;"	v	file:
+m_vao	.\ltiles.h	/^	GLuint m_vao;$/;"	m	class:VAO
+m_vbo	.\ltiles.h	/^	GLuint m_ibo, m_vbo;$/;"	m	class:VAO
+m_vecIndex	.\ltiles.h	/^	std::vector<GLint> m_vecIndex;$/;"	m	class:VAO
+m_vecRange	.\ldrawable.h	/^	std::vector<Range> m_vecRange;$/;"	m	class:LODDrawable
+m_vecTile	.\ldrawable.h	/^	std::vector<std::auto_ptr<TileThread>> m_vecTile;$/;"	m	class:LODDrawable
+m_vecVertex	.\ltiles.h	/^	std::vector<GLfloat> m_vecVertex;$/;"	m	class:VAO
+m_velocityX	.\lmanipulator.h	/^	int m_velocityX;$/;"	m	class:Manipulator
+m_velocityY	.\lmanipulator.h	/^	int m_velocityY;$/;"	m	class:Manipulator
+m_vertexBuf	.\ltiles.h	/^	mutable VAO m_vertexBuf;$/;"	m	class:LODTile
+normalize	.\ltiles.h	/^	void normalize()$/;"	f	struct:_VECTOR
+notify	.\lodalg.cpp	/^	void notify(osg::NotifySeverity severity, const char* message)$/;"	f	class:errorHandler
+operator ()	.\Matrix.h	/^	T& operator()(int w, int h) const$/;"	f	class:CMatrix
+operator *	.\ltiles.h	/^	T operator*(const _VECTOR& n) const$/;"	f	struct:_VECTOR
+operator +	.\ltiles.h	/^	_VECTOR operator+(const _VECTOR& n)const$/;"	f	struct:_VECTOR
+operator -	.\ltiles.h	/^	_VECTOR operator-(const _VECTOR& n)const$/;"	f	struct:_VECTOR
+operator /	.\ltiles.h	/^	_VECTOR operator\/(float s)const$/;"	f	struct:_VECTOR
+rawData	.\linput.cpp	/^rawData::rawData() :dataImp()$/;"	f	class:rawData
+rawData	.\linput.h	/^class rawData : public dataImp$/;"	c
+rawDataProxy	.\linput.cpp	/^rawDataProxy::rawDataProxy() :dataImp()$/;"	f	class:rawDataProxy
+rawDataProxy	.\linput.h	/^class rawDataProxy :public dataImp$/;"	c
+run	.\lthreads.cpp	/^void TileThreadW::run()$/;"	f	class:TileThreadW
+run	.\lthreads.h	/^	virtual void run() const$/;"	f	class:TileThreadP
+saveBMP	.\ldrawable.cpp	/^void saveBMP(int width, int height, int channel, BYTE* data, char* filename, int pixelFormat = GL_BGR)$/;"	f
+set	.\ltiles.h	/^	void set(int x, int y)$/;"	f	struct:_PatchSize
+setImp	.\linput.cpp	/^void heightField::setImp(dataImp* imp)$/;"	f	class:heightField
+setLOD	.\ltiles.h	/^	void setLOD(int l)$/;"	f	struct:_NODE
+setSize	.\linput.cpp	/^void gdalData::setSize(int width, int height)$/;"	f	class:gdalData
+setSize	.\linput.cpp	/^void gdalDataProxy::setSize(int width, int height)$/;"	f	class:gdalDataProxy
+updateCameraInfo	.\lthreads.cpp	/^void TileThreadW::updateCameraInfo(osg::Vec3d& eye) const$/;"	f	class:TileThreadW
+updateCameraInfo	.\lthreads.cpp	/^void TileThreadW::updateCameraInfo(osg::Vec3d& eye, osg::GLBeginEndAdapter& gl, osg::State* stat) const$/;"	f	class:TileThreadW
+updateCameraInfo	.\lthreads.h	/^	void updateCameraInfo(osg::Vec3d& eye) const$/;"	f	class:TileThreadP
+updateCameraInfo	.\lthreads.h	/^	void updateCameraInfo(osg::Vec3d& eye, osg::GLBeginEndAdapter& gl, osg::State* stat) const$/;"	f	class:TileThreadP
+updateCameraInfo	.\ltiles.cpp	/^void LODTile::updateCameraInfo(osg::Vec3d&	eye, osg::GLBeginEndAdapter& gl, osg::State* stat)$/;"	f	class:LODTile
+updateCameraInfo	.\ltiles.cpp	/^void LODTile::updateCameraInfo(osg::Vec3d& eye)$/;"	f	class:LODTile
+updateIndex	.\ltiles.cpp	/^void VAO::updateIndex(const UINT* indx, int size)$/;"	f	class:VAO
+~CMatrix	.\Matrix.h	/^    ~CMatrix(){if(data!=NULL) delete data; data = NULL;}$/;"	f	class:CMatrix
+~LODDrawable	.\ldrawable.cpp	/^LODDrawable::~LODDrawable()$/;"	f	class:LODDrawable
+~Manipulator	.\lmanipulator.cpp	/^Manipulator::~Manipulator()$/;"	f	class:Manipulator
+~VAO	.\ltiles.cpp	/^VAO::~VAO()$/;"	f	class:VAO
+~errorHandler	.\lodalg.cpp	/^	~errorHandler(void) {$/;"	f	class:errorHandler

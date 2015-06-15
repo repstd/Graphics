@@ -6,36 +6,49 @@
 template <class T>
 class CMatrix
 {
-private:
-	mutable int row, col;
-	mutable T * data;
-	
+
 public:
-	CMatrix():row(0),col(0),data(NULL){}
-	//CMatrix(int r, int c):row(r),col(c),data(new T[r*c]){}
-	//CMatrix(int r, int c, T* pData):row(r),col(c),data(new T[r*c])
-	//{
-	//	memcpy(data, pData, row*col*sizeof(T));
-	//}
+	CMatrix() :_width(0), _height(0), data(NULL){}
     ~CMatrix(){if(data!=NULL) delete data; data = NULL;}
 	
-	T& operator()(int i, int j) const
+	T& operator()(int w, int h) const
 	{ 
-		return data[i*col + j];
+		return data[h*_width + w];
 	
 	};
-	void SetData(T *pData){	memcpy(data, pData, row*col*sizeof(T)); }
-	void Reset(int r, int c) const
-	{
-		if (data == NULL)
-		{
-			row = r;
-			col = c;
-			data = new T[row*col];
-
-		}
-		memset(data, 0, row*col);
+	void SetData(T *pData)
+	{	
+		memcpy(data, pData, _width*_height*sizeof(T));
 	}
-	void Reset(int r, int c, T* pData){Reset(r,c); SetData(pData);}
+	void SetData(T *pData,int srcOffsetX,int srcOffsetY,int srcWidth,int SrcHeight,int dstWidth,int dstHeight,bool isFlip=true)
+	{
+		for (int y = 0; y < dstHeight; y++)
+		{
+			if (isFlip)
+				memcpy(data + y*dstWidth, pData + ((srcOffsetY + dstHeight - 1 - y)*srcWidth + srcOffsetX)*sizeof(T), dstWidth*sizeof(T));
+			else
+				memcpy(data + y*dstWidth, pData + ((srcOffsetY+y)*srcWidth + srcOffsetX)*sizeof(T), dstWidth*sizeof(T));
+		}
+	}
+	void Reset(int w, int h) const
+	{
+
+		if (data != NULL && (w != _width || h != _height))
+		{
+			
+			delete data;
+			data = NULL;
+		}
+		_width = w;
+		_height = h;
+		if (data == NULL)
+			data = new T[_width*_height];
+	
+		memset(data, 0, _width*_height);
+	}
+private:
+	mutable int _width, _height;
+	mutable T * data;
+
 };
 #endif //__MATRIX_H__
