@@ -5,6 +5,7 @@
 #include <osg/GLBeginEndAdapter>
 #include <OpenThreads\Thread>
 #include <assert.h>
+class texImp;
 class heightField;
 enum STATUS
 {
@@ -211,11 +212,11 @@ public:
 	void BFSRenderPrimitive() const;
 	void DrawIndexedPrimitive() const;
 	Range getLocalRange();
+
 private:
-
-
 	void initParams();
-
+	inline void GLVERTEX_MESH(int x, int y) const;
+	inline void GLVERTEX_TEX(int x, int y) const;
 	inline void GLVERTEX(int x, int y) const;
 	inline void local2Global(int& x, int& y, int& z) const;
 
@@ -232,12 +233,11 @@ private:
 	VECTOR getNormal(int x, int y, int dx, int dy) const;
 
 	void CalculateDHMatrix();
-	void DrawPrim_FILL(int x, int y) const;
 
-	//void DrawPrim_TEXTURE(int x, int y);
+	void DrawPrim_TEXTURE(int x, int y) const;
 	void DrawPrim_FRAME(int x, int y) const;
-	void DrawNode_FILL(int x, int y, int dx, int dy) const;
-	//void DrawNode_TEXTURE(int x, int y, int d);
+
+	void DrawNode_TEXTURE(int x, int y, int dx, int dy) const;
 	void DrawNode_FRAME(int x, int y, int dx, int dy) const;
 private:
 	CMatrix<BYTE> m_HMMatrix;
@@ -255,7 +255,7 @@ private:
 	mutable osg::GLBeginEndAdapter m_gl;
 	mutable osg::State* m_stat;
 #endif
-
+	std::unique_ptr<texImp> m_texture;
 	mutable VAO m_vertexBuf;
 	mutable std::vector<UINT> m_indexBuf;
 };

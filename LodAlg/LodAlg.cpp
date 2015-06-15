@@ -22,6 +22,7 @@
 #include <OpenThreads\Thread>
 #include "rcfactory.h"
 #define _HEIGHT_FIELD_FILE_RAW "./data/terrain.raw"
+#define _HEIGHT_FIELD_FILE_BMP "./data/Terrain.bmp"
 #define _HEIGHT_FIELD_FILE_SRTM "./data/srtm_ramp2_world_5400x2700_2.jpg"
 #define _HEIGHT_FIELD_FILE_PUGET_ASC "E://1.MyDocuments//LOD//MSR_Hoppe_PM//psdem_2005//psdem//psdem_2005.asc"
 rcpipeServer* g_pipeServer;
@@ -109,38 +110,6 @@ void readFromMemShareAndSyncMatrix(osgViewer::Viewer* viewer)
 	decodeMsg(viewer, buf);
 }
 
-class camDrawcallback :public osg::Drawable::DrawCallback
-{
-
-public:
-	camDrawcallback()
-	{	
-	}
-
-	camDrawcallback(const osg::Drawable::DrawCallback & cb, const osg::CopyOp& co)
-	:osg::Drawable::DrawCallback(cb,co)
-	{
-	}
-
-
-	virtual void drawImplementation(osg::RenderInfo& /*renderInfo*/ renderinfo, const osg::Drawable* /*drawable*/) const 
-	{
-		osg::ref_ptr<osg::Camera> camera = renderinfo.getCurrentCamera();
-		osg::Matrixd mat= camera->getViewMatrix();
-		osg::Matrixd cameraRotation;
-		cameraRotation.makeRotate(
-			osg::DegreesToRadians(0.0), osg::Vec3(0, 1, 0),
-			osg::DegreesToRadians(0.0), osg::Vec3(1, 0, 0),
-			osg::DegreesToRadians(180.0), osg::Vec3(0, 0, 1));
-
-		camera->setViewMatrix(cameraRotation*mat);
-
-		renderinfo.getView()->setCamera(camera);
-
-	
-	}
-
-};
 class errorHandler : public osg::NotifyHandler
 {
 public:
@@ -162,12 +131,6 @@ protected:
 };
 int _tmain(int argc, _TCHAR* argv[])
 {
-//#undef __MASTER
-#ifdef __MASTER
-	initMemShareWriter();
-#else
-	initMemShareReader();
-#endif
 	osg::ref_ptr<osgViewer::Viewer> viewer=new osgViewer::Viewer;
 	viewer->setUpViewInWindow(50, 50, 1280, 720);
 	viewer->realize();
@@ -176,10 +139,12 @@ int _tmain(int argc, _TCHAR* argv[])
 	cameraRotation.makeRotate(osg::DegreesToRadians(180.0), osg::Z_AXIS);
 	viewer->getCamera()->getGraphicsContext()->makeCurrent();
 	viewer->setDataVariance(osg::Object::DYNAMIC);
-	
-	std::unique_ptr<dataImp> rawdata(dataImpFactory::instance()->createRawImp(_HEIGHT_FIELD_FILE_RAW));
+	//std::unique_ptr<dataImp> rawdata(dataImpFactory::instance()->createRawImp(_HEIGHT_FIELD_FILE_RAW));
+
+	//Textured Raw Data
+	std::unique_ptr<dataImp> texRawData(dataImpFactory::instance()->createBmpTerrainImp(_HEIGHT_FIELD_FILE_RAW, _HEIGHT_FIELD_FILE_BMP));
 	//std::unique_ptr<dataImp> gdaldata(dataImpFactory::instance()->createGDALImp(_HEIGHT_FIELD_FILE_SRTM, "GeoTiff"));
-	std::unique_ptr<heightField> input(new heightField(rawdata.release()));
+	std::unique_ptr<heightField> input(new heightField(texRawData.release()));
 	LODDrawable* lod = new LODDrawable(lodImpFactory::instance()->createQuadTreeImp());
 	lod->init(input.release());
 	//lod->init(_HEIGHT_FIELD_FILE_RAW);
@@ -214,11 +179,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	while (!viewer->done())
 	{
 		viewer->advance();
-#ifdef __MASTER
-		writeToMemShare(viewer);
-#else
-		readFromMemShareAndSyncMatrix(viewer);
-#endif
 		viewer->frame();
 		viewer->eventTraversal();
 		viewer->updateTraversal();

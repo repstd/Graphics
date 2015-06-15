@@ -71,7 +71,7 @@ void quadTreeImp::init(heightField* input)
 
 	setGlobalRange(global);
 	int index;
-	int N = 2;
+	int N = 1;
 
 	for (int i = 0; i < N; i++)
 	{

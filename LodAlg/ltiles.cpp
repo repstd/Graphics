@@ -174,14 +174,14 @@ LODTile::LODTile()
 
 void LODTile::initParams()
 {
-	m_fC = 1;
+	m_fC = 50;
 	m_fc = 1.5;
 	m_fScale = 1.0;
 	m_LodMatrix.Reset(m_rlocalPara._width, m_rlocalPara._height);
 	m_DHMatrix.Reset(m_rlocalPara._width, m_rlocalPara._height);
 	for (int i = 0; i < m_rlocalPara._width; i++)
-	for (int j = 0; j < m_rlocalPara._height; j++)
-		m_LodMatrix(i, j) = VS_UNREACH;
+		for (int j = 0; j < m_rlocalPara._height; j++)
+			m_LodMatrix(i, j) = VS_UNREACH;
 	CalculateDHMatrix();
 
 	int sizeX = m_rlocalPara._width - 1;
@@ -224,6 +224,9 @@ void LODTile::init(BYTE* heightMat, const Range globalRange, const Range localRa
 
 void LODTile::init(heightField* input, int i, int j, int N)
 {
+	terrainImp* terr = dynamic_cast<terrainImp*>(input->getImp());
+	if (terr)
+		m_texture.reset(terr->getTexture());
 	BYTE* temp = new unsigned char[input->getTileWidth(i, j, N)* input->getTileHeight(i, j, N)];
 
 	input->generateTile(i, j, N, temp, m_rlocalPara, m_rglobalPara);
@@ -268,7 +271,7 @@ void LODTile::updateCameraInfo(osg::Vec3d&	eye, osg::GLBeginEndAdapter& gl, osg:
 
 void LODTile::BFSRender() const
 {
-
+	m_texture->bind();
 	std::vector<LNODE>  v1;
 	std::vector<LNODE>  v2;
 	std::vector<LNODE>* cur_Queue;
@@ -352,6 +355,7 @@ void LODTile::BFSRender() const
 	DrawIndexedPrimitive();
 #endif
 #endif
+	m_texture->unbind();
 }
 void LODTile::DrawIndexedPrimitive() const
 {
@@ -498,7 +502,7 @@ VECTOR LODTile::getNormal(int x, int y, int dx, int dy) const
 
 	VECTOR ave = (nFaceLeft + nFaceDown + nFaceRight + nFaceUp) / 4.0f;
 	ave.normalize();
-	return nFaceLeft;
+	return ave;
 }
 
 unsigned char LODTile::CanActive(int x, int y, int patchSizeX, int patchSizeY) const
@@ -515,12 +519,10 @@ unsigned char LODTile::CanActive(int x, int y, int patchSizeX, int patchSizeY) c
 	lz = z;
 	local2Global(lx, ly, lz);
 	//VECTOR observeVec = VECTOR(x - m_rlocalPara._width / 2 - m_ViewX, y - m_rlocalPara._height / 2 - m_ViewY, z - 100 - m_ViewZ);
-
 	VECTOR observeVec = VECTOR(lx - m_ViewX, ly - m_ViewY, lz - m_ViewZ);
-
 	float fViewDistance = observeVec.length();
 	float f;
-	float cosAngle = 0.0;
+	float cosAngle = 1.0;
 
 	if (x - d >= 0 && x - d < m_rlocalPara._width && y - d >= 0 && y - d < m_rlocalPara._height)
 	{
@@ -533,7 +535,7 @@ unsigned char LODTile::CanActive(int x, int y, int patchSizeX, int patchSizeY) c
 		return VS_DISABLE;
 	f = fViewDistance / (patchSizeX*abs(cosAngle)*m_fC*max(m_fc*m_DHMatrix(x, y), 1.0f));
 
-	if (f < 0.3f)
+	if (f < 0.5f)
 		return VS_ACTIVE;
 	else
 		return VS_DISABLE;
@@ -618,14 +620,15 @@ void LODTile::CheckNeighbor(int cx, int cy, int dx, int dy) const
 	}
 }
 
-void LODTile::DrawNode(int cx, int cy, int d, int dy) const
+void LODTile::DrawNode(int cx, int cy, int dx, int dy) const
 {
-
-	DrawNode_FRAME(cx, cy, d, d);
+	DrawNode_FRAME(cx, cy, dx, dy);
+	//DrawNode_TEXTURE(cx, cy, dx, dy);
 }
 void LODTile::DrawPrim(int cx, int cy) const
 {
 	DrawPrim_FRAME(cx, cy);
+	//DrawPrim_TEXTURE(cx, cy);
 
 }
 
@@ -651,6 +654,10 @@ inline void LODTile::local2Global(int& x, int& y, int& z) const
 }
 inline void LODTile::GLVERTEX(int x, int y) const
 {
+	GLVERTEX_TEX(x, y);
+}
+inline void LODTile::GLVERTEX_MESH(int x, int y) const
+{
 #ifdef _GL_ELE_ARRAY
 	m_indexBuf.push_back(y*m_rglobalPara._width+x);
 #else
@@ -662,27 +669,19 @@ inline void LODTile::GLVERTEX(int x, int y) const
 #endif
 
 }
-void LODTile::DrawNode_FILL(int x, int z, int d, int dy) const
-{
-	GL_BEGIN(GL_TRIANGLE_FAN);
-	glColor3f(1, 0, 0);
-	GLVERTEX(x, z);
 
-	glColor3f(1, 1, 1);
-	GLVERTEX(x - d, z + d);
-	if (m_neighbor[NV_L] == VS_ACTIVE)
-		GLVERTEX(x - d, z);
-	GLVERTEX(x - d, z - d);
-	if (m_neighbor[NV_D] == VS_ACTIVE)
-		GLVERTEX(x, z - d);
-	GLVERTEX(x + d, z - d);
-	if (m_neighbor[NV_R] == VS_ACTIVE)
-		GLVERTEX(x + d, z);
-	GLVERTEX(x + d, z + d);
-	if (m_neighbor[NV_U] == VS_ACTIVE)
-		GLVERTEX(x, z + d);
-	GLVERTEX(x - d, z + d);
-	GL_END();
+inline void LODTile::GLVERTEX_TEX(int x, int y) const
+{
+#ifdef _GL_ELE_ARRAY
+	m_indexBuf.push_back(y*m_rglobalPara._width+x);
+#else
+	int z = GetHeight(x, y);
+	int lx = x;
+	int ly = y;
+	local2Global(lx, ly, z);
+	//glTexCoord2f(lx/m_rglobalPara._width, ly/m_rglobalPara._height);
+	glVertex3f(lx, ly, z);
+#endif
 }
 
 
@@ -754,7 +753,6 @@ void LODTile::DrawNode_FRAME(int x, int z, int dx, int dy) const
 void LODTile::DrawNode_FRAME(int x, int y, int dx, int dy) const
 {
 
-
 	glPushAttrib(GL_COLOR);
 	//left
 	if (m_neighbor[NV_L] == VS_ACTIVE)
@@ -825,61 +823,62 @@ void LODTile::DrawNode_FRAME(int x, int y, int dx, int dy) const
 }
 #endif
 
+#ifdef _DRAW_METHODA_4
+void LODTile::DrawNode_FRAME(int x, int y, int dx, int dy) const
+{
+
+	GL_BEGIN(GL_TRIANGLE_FAN);
+	GLVERTEX(x, y);
+	GLVERTEX(x - dx, y + dy);
+	GLVERTEX(x - dx, y - dy);
+	GL_END();
+	if (m_neighbor[NV_L] == VS_ACTIVE)
+	{
+		GLVERTEX(x - dx, y);
+		GLVERTEX(x - dx, y + dy);
+		GLVERTEX(x - dx, y - dy);
+	}
+	GL_BEGIN(GL_TRIANGLE_FAN);
+	GLVERTEX(x, y);
+	GLVERTEX(x - dx, y - dy);
+	GLVERTEX(x + dx, y - dy);
+	GL_END();
+
+	if (m_neighbor[NV_D] == VS_ACTIVE)
+	{
+		GLVERTEX(x, y - dy);
+		GLVERTEX(x - dx, y - dy);
+		GLVERTEX(x + dx, y - dy);
+	}
+	GL_BEGIN(GL_TRIANGLE_FAN);
+	GLVERTEX(x, y);
+	GLVERTEX(x + dx, y - dy);
+	GLVERTEX(x + dx, y + dy);
+	GL_END();
+	if (m_neighbor[NV_R] == VS_ACTIVE)
+	{
+		GLVERTEX(x, y);
+		GLVERTEX(x + dx, y - dy);
+		GLVERTEX(x + dx, y + dy);
+	}
+	GL_BEGIN(GL_TRIANGLE_FAN);
+	GLVERTEX(x, y);
+	GLVERTEX(x + dx, y + dy);
+	GLVERTEX(x - dx, y + dy);
+	{
+		GLVERTEX(x, y);
+		GLVERTEX(x - dx, y + dy);
+		GLVERTEX(x + dx, y + dy);
+	}
+	GL_END();
+
+}
+#endif
+
 #ifdef _DRAW_METHOD_3
 void LODTile::DrawNode_FRAME(int x, int y, int dx, int dy) const
 {
 
-	GL_BEGIN(GL_TRIANGLE_FAN);
-	GLVERTEX(x, y);
-	GLVERTEX(x - dx, y + dy);
-	GLVERTEX(x - dx, y - dy);
-	GL_END();
-	if (m_neighbor[NV_L] == VS_ACTIVE)
-	{
-		GLVERTEX(x - dx, y);
-		GLVERTEX(x - dx, y + dy);
-		GLVERTEX(x - dx, y - dy);
-	}
-	GL_BEGIN(GL_TRIANGLE_FAN);
-	GLVERTEX(x, y);
-	GLVERTEX(x - dx, y - dy);
-	GLVERTEX(x + dx, y - dy);
-	GL_END();
-
-	if (m_neighbor[NV_D] == VS_ACTIVE)
-	{
-		GLVERTEX(x, y - dy);
-		GLVERTEX(x - dx, y - dy);
-		GLVERTEX(x + dx, y - dy);
-	}
-	GL_BEGIN(GL_TRIANGLE_FAN);
-	GLVERTEX(x, y);
-	GLVERTEX(x + dx, y - dy);
-	GLVERTEX(x + dx, y + dy);
-	GL_END();
-	if (m_neighbor[NV_R] == VS_ACTIVE)
-	{
-		GLVERTEX(x, y);
-		GLVERTEX(x + dx, y - dy);
-		GLVERTEX(x + dx, y + dy);
-	}
-	GL_BEGIN(GL_TRIANGLE_FAN);
-	GLVERTEX(x, y);
-	GLVERTEX(x + dx, y + dy);
-	GLVERTEX(x - dx, y + dy);
-	{
-		GLVERTEX(x, y);
-		GLVERTEX(x - dx, y + dy);
-		GLVERTEX(x + dx, y + dy);
-	}
-	GL_END();
-
-}
-#endif
-#ifdef _DRAW_METHOD_4
-void LODTile::DrawNode_FRAME(int x, int y, int dx, int dy) const
-{
-
 	GL_BEGIN(GL_LINE_LOOP);
 	GLVERTEX(x, y);
 	GLVERTEX(x - dx, y + dy);
@@ -924,15 +923,8 @@ void LODTile::DrawNode_FRAME(int x, int y, int dx, int dy) const
 		GLVERTEX(x + dx, y + dy);
 	}
 	GL_END();
-
 }
 #endif
-void LODTile::DrawPrim_FILL(int x, int z) const
-{
-
-	DrawNode_FILL(x, z, 1, 1);
-}
-
 
 void LODTile::DrawPrim_FRAME(int x, int z) const
 {
@@ -941,4 +933,35 @@ void LODTile::DrawPrim_FRAME(int x, int z) const
 Range LODTile::getLocalRange()
 {
 	return m_rlocalPara;
+}
+void LODTile::DrawPrim_TEXTURE(int x, int y) const
+{
+	DrawNode_TEXTURE(x, y, 1, 1);
+}
+void LODTile::DrawNode_TEXTURE(int x, int y, int dx,int dy) const
+{
+	GL_BEGIN(GL_TRIANGLE_FAN);
+	//Center
+	GLVERTEX_TEX(x, y);
+	if (m_neighbor[NV_L] == VS_ACTIVE)
+		GLVERTEX_TEX(x - dx, y - dy);
+	//Left down
+	GLVERTEX_TEX(x - dx, y - dy);
+	//down
+	if (m_neighbor[NV_D] == VS_ACTIVE)
+		GLVERTEX_TEX(x, y - dy);
+	//right down
+	GLVERTEX_TEX(x + dx, y - dy);
+	//right
+	if (m_neighbor[NV_R] == VS_ACTIVE)
+		GLVERTEX_TEX(x + dx, y);
+	//Right up
+	GLVERTEX_TEX(x + dx, y + dx);
+	//up
+	if (m_neighbor[NV_U] == VS_ACTIVE)
+		GLVERTEX_TEX(x, y + dy);
+	//Left_up
+	GLVERTEX_TEX(x - dx, y + dy);
+	GL_END();
+
 }

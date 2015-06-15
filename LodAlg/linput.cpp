@@ -1,8 +1,12 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "linput.h"
+#include <windows.h>
+#include <stdlib.h>
 #include <iostream>
+#include <fstream>
+#include <string>
 #include "ltiles.h"
-
+#include <cstdint>
 void dataImp::flipBuffer(BYTE* src, int width, int height)
 {
 	BYTE* temp = new unsigned char[width];
@@ -107,7 +111,7 @@ rawDataProxy::rawDataProxy() :dataImp()
 {
 
 }
-
+rawDataProxy::~rawDataProxy() {}
 
 gdalData::gdalData() :dataImp()
 {
@@ -122,7 +126,7 @@ void gdalData::load(const char* filename, const char* driverName)
 	m_iRasterHeight = src->GetRasterYSize();
 	m_iSize = m_iRasterHeight*m_iRasterWidth*m_iRasterCnts;
 	GDALDestroyDriver(driver);
-	
+
 }
 void gdalData::getExtent(extent& extent)
 {
@@ -159,7 +163,7 @@ void gdalData::clip()
 	float	m = log((float)originalWidth) / log(2.0f);
 	float	n = log((float)originalHeight) / log(2.0f);
 
-	int exp = ([](int a, int b){return a>b?b:a; })(m, n);
+	int exp = ([](int a, int b){return a > b ? b : a; })(m, n);
 
 	int cliped = pow(2.0, exp) + 1;
 
@@ -176,7 +180,7 @@ void gdalDataProxy::load(const char* filename, const char* driverName)
 	m_driverName = driverName;
 	m_filename = filename;
 	std::unique_ptr<GDALDriver> tempDriver(GetGDALDriverManager()->GetDriverByName(driverName));
-	m_driver= std::move(tempDriver);
+	m_driver = std::move(tempDriver);
 	tempDriver.release();
 	std::unique_ptr<gdalData> tempGdalData(new gdalData);
 	m_gdalData = std::move(tempGdalData);
@@ -202,13 +206,13 @@ void gdalDataProxy::getTile(BYTE* dst, int row, int col, int N)
 	int tileWidth = (ext._width - 1) / N + 1;
 	int tileHeight = (ext._height - 1) / N + 1;
 
-	int srcOffsetX = row*(tileWidth-1);
-	int srcOffsetY = (N - 1 - col)*(tileHeight-1);
+	int srcOffsetX = row*(tileWidth - 1);
+	int srcOffsetY = (N - 1 - col)*(tileHeight - 1);
 
 	BYTE* buf = (BYTE*)CPLCalloc(tileWidth*tileHeight * 1 * sizeof(BYTE), 1);
-	
-	CPLErr error=src->RasterIO(GF_Read, srcOffsetX, srcOffsetY, tileWidth, tileHeight, buf, tileWidth, tileHeight, GDT_Byte, 1, NULL, 1, 0, 1);
-	
+
+	CPLErr error = src->RasterIO(GF_Read, srcOffsetX, srcOffsetY, tileWidth, tileHeight, buf, tileWidth, tileHeight, GDT_Byte, 1, NULL, 1, 0, 1);
+
 	flipBuffer(buf, tileWidth, tileHeight);
 
 	getTile(buf, dst, row, col, N);
@@ -278,6 +282,12 @@ dataImp* dataImpFactory::createGDALImp(const char* filename, const char* driverN
 	std::unique_ptr<gdalDataProxy> gdal(new gdalDataProxy);
 	gdal->load(filename, driverName);
 	return gdal.release();
+}
+dataImp* dataImpFactory::createBmpTerrainImp(const char* meshFilename, const char* bmpFilename)
+{
+	std::unique_ptr<terrainImp> texturedData(new terrainImp(new glTexImp(bmpFilename)));
+	texturedData->load(meshFilename);
+	return texturedData.release();
 }
 heightField::heightField(dataImp* input)
 {
@@ -380,4 +390,157 @@ void heightField::generateTile(int i, int j, int N, BYTE* dst, Range& tileRange,
 	globalRange._index_i = 0;
 	globalRange._index_j = 0;
 	globalRange._N = N;
+}
+
+glTexImp::glTexImp() :texImp(), m_width(-1), m_height(-1)
+{
+	
+}
+glTexImp::~glTexImp()
+{
+}
+void glTexImp::load(const char* imgName)
+{
+	if (imgName&&strstr(imgName, ".bmp") != NULL)
+		loadBmp(imgName);
+}
+glTexImp::glTexImp(const char* imgName):texImp(), m_width(-1), m_height(-1)
+{
+	load(imgName);
+}
+bool is_big_endian()
+{
+	int i = 1;
+	return !((char*)&i)[0];
+}
+int32_t to_int32(char* buffer, int length)
+{
+	int32_t i = 0;
+	if (!is_big_endian()) {
+		for (int j = 0; j < length; j++)
+			((char*)&i)[j] = buffer[j];
+	}
+	else {
+		for (int j = 0; j<length; j++)
+			((char*)&i)[sizeof(int)-1 - j] = buffer[j];
+	}
+	return i;
+}
+#define BITMAP_ID 0x4D42
+void glTexImp::loadBmp(const char* imgName)
+{
+	//ref:https://github.com/confuzedskull/bmpLoader/blob/master/main.cpp
+	FILE *pFile = 0;
+	unsigned char* image;
+	BITMAPINFOHEADER bitmapInfoHeader;
+	BITMAPFILEHEADER header;
+	unsigned char textureColors = 0;
+
+	pFile = fopen(imgName, "rb");
+	if (pFile == 0) 
+		return;
+	fread(&header, sizeof(BITMAPFILEHEADER), 1, pFile);
+	if (header.bfType != BITMAP_ID)
+	{
+		fclose(pFile);             
+		return;
+	}
+	fread(&bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, pFile);
+	m_width= bitmapInfoHeader.biWidth;
+	m_height= bitmapInfoHeader.biHeight;
+	if (bitmapInfoHeader.biSizeImage == 0)
+		bitmapInfoHeader.biSizeImage = bitmapInfoHeader.biWidth *
+		bitmapInfoHeader.biHeight * 3;
+	fseek(pFile, header.bfOffBits, SEEK_SET);
+	image = new unsigned char[bitmapInfoHeader.biSizeImage];
+	if (!image)                       
+	{
+		delete[] image;
+		fclose(pFile);
+		return;
+	}
+	fread(image, 1, bitmapInfoHeader.biSizeImage, pFile);
+	for (int index = 0; index < (int)bitmapInfoHeader.biSizeImage; index += 3)
+	{
+		textureColors = image[index];
+		image[index] = image[index + 2];
+		image[index + 2] = textureColors;
+	}
+
+	fclose(pFile); 
+#if 0
+	char* data;
+	char file_info[4];
+	std::ifstream image_file;
+	image_file.open(imgName, std::ios::binary);
+	if (image_file.bad())
+	{
+		std::cerr << "error loading file.\n";
+		return;
+	}
+	image_file.seekg(18, image_file.cur);//skip beginning of header
+	image_file.read(file_info, 4);//width
+	m_width = to_int32(file_info, 4);//convert raw data to integer
+	image_file.read(file_info, 4);//height
+	m_height= to_int32(file_info, 4);//convert raw data to integer
+	image_file.seekg(28, image_file.cur);//skip rest of header
+	int image_area = m_width*m_height;//calculate area now since it'll be used 3 times
+	data = new char[image_area * 3];//set the buffer size
+	image_file.read(data, image_area * 3);//get the pixel matrix
+	image_file.close();
+	//next we need to rearrange the color values from BGR to RGB
+	for (int i = 0; i < image_area; ++i)//iterate through each cell of the matrix
+	{
+		int index = i * 3;
+		unsigned char B, R;
+		B = data[index];
+		R = data[index + 2];
+		data[index] = R;
+		data[index + 2] = B;
+	}
+	delete[] data;
+#endif
+	glGenTextures(1, &m_texId);
+
+	glBindTexture(GL_TEXTURE_2D, m_texId);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, image); 
+
+	delete image;
+}
+int glTexImp::getWidth()
+{
+	return m_width;
+}
+int glTexImp::getHeight()
+{
+	return m_height;
+}
+GLuint glTexImp::getTexId()
+{
+	return m_texId;
+}
+void glTexImp::bind()
+{
+	//glEnable(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D, m_texId);
+}
+void glTexImp::unbind()
+{
+	//glDisable(GL_TEXTURE_2D);
+}
+terrainImp::terrainImp(texImp* imp):rawDataProxy()
+{
+	m_texture.reset(imp);
+}
+terrainImp::~terrainImp()
+{
+	m_texture.reset();
+}
+texImp* terrainImp::getTexture()
+{
+	return m_texture.get();
 }

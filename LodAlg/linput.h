@@ -13,6 +13,14 @@ typedef struct _extent
 	int _height;
 	int _channel;
 } extent;
+
+class texImp
+{
+public:
+	virtual void load(const char* imgName)= 0;
+	virtual void bind() = 0;
+	virtual void unbind() = 0;
+};
 class dataImp
 {
 public:
@@ -53,6 +61,7 @@ public:
 	extent getExtent();
 	const char* getFilename();
 	rawData* getInputData();
+	virtual ~rawDataProxy();
 protected:
 	rawDataProxy();
 private:
@@ -101,18 +110,52 @@ private:
 	std::string m_driverName;
 	friend class dataImpFactory;
 };
+
+class glTexImp :public texImp
+{
+public:
+	glTexImp();
+	glTexImp(const char* imgName);
+	~glTexImp();
+	virtual void load(const char* imgName);
+	virtual void bind();
+	virtual void unbind();
+	void loadBmp(const char* filename);
+	int getWidth();
+	int getHeight();
+	GLuint getTexId();
+private:
+	GLuint m_texId;
+	int m_width;
+	int m_height;
+};
+/*combine the mesh and texture
+*/
+class terrainImp:public rawDataProxy
+{
+public:
+	texImp* getTexture();
+	virtual ~terrainImp();
+protected:
+	terrainImp(texImp* imp);
+private:
+	std::unique_ptr<texImp> m_texture;
+	friend class dataImpFactory;
+};
 class dataImpFactory
 {
 public:
 	enum _data_type
 	{
 		_RAW,
-		_GDAL_SUPPORTED
+		_GDAL_SUPPORTED,
+		_RAW_BMP
 	};
 	static dataImpFactory* instance();
 	dataImp* create(int type, const char* fileneme, const char* driverName = NULL);
 	dataImp* createRawImp(const char* filename);
 	dataImp* createGDALImp(const char* filename, const char* driverName);
+	dataImp* createBmpTerrainImp(const char* meshFilename, const char* bmpFilename);
 protected:
 	dataImpFactory(){ return; }
 };
